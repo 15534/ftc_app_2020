@@ -30,7 +30,7 @@ public class OdometryCalibration extends LinearOpMode {
     //IMU Sensor
     BNO055IMU imu;
 
-    final double PIVOT_SPEED = 0;
+    final double PIVOT_SPEED = 0.25;
 
     //The amount of encoder ticks for each inch the robot moves. THIS WILL CHANGE FOR EACH ROBOT AND NEEDS TO BE UPDATED HERE
     final double COUNTS_PER_INCH = HardwareNames.COUNTS_PER_INCH;
@@ -73,14 +73,10 @@ public class OdometryCalibration extends LinearOpMode {
 
         //Begin calibration (if robot is unable to pivot at these speeds, please adjust the constant at the top of the code
         while(getZAngle() < 90 && opModeIsActive()){
-            right_front.setPower(-PIVOT_SPEED);
-            right_back.setPower(-PIVOT_SPEED);
-            left_front.setPower(PIVOT_SPEED);
-            left_back.setPower(PIVOT_SPEED);
             if(getZAngle() < 60) {
-                setPowerAll(-PIVOT_SPEED, -PIVOT_SPEED, PIVOT_SPEED, PIVOT_SPEED);
+                setPowerAll(PIVOT_SPEED, PIVOT_SPEED, -PIVOT_SPEED, -PIVOT_SPEED);
             }else{
-                setPowerAll(-PIVOT_SPEED/2, -PIVOT_SPEED/2, PIVOT_SPEED/2, PIVOT_SPEED/2);
+                setPowerAll(PIVOT_SPEED/2, PIVOT_SPEED/2, -PIVOT_SPEED/2, -PIVOT_SPEED/2);
             }
 
             telemetry.addData("IMU Angle", getZAngle());
@@ -109,7 +105,7 @@ public class OdometryCalibration extends LinearOpMode {
 
         double wheelBaseSeparation = (2*90*verticalEncoderTickOffsetPerDegree)/(Math.PI*COUNTS_PER_INCH);
 
-        horizontalTickOffset = horizontal.getCurrentPosition()/Math.toRadians(getZAngle());
+        horizontalTickOffset = -horizontal.getCurrentPosition()/Math.toRadians(getZAngle());
 
         //Write the constants to text files
         ReadWriteFile.writeFile(wheelBaseSeparationFile, String.valueOf(wheelBaseSeparation));
@@ -162,12 +158,12 @@ public class OdometryCalibration extends LinearOpMode {
         horizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-//        right_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        right_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        left_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        left_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        right_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        right_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        left_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        left_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        left_front.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_front.setDirection(DcMotorSimple.Direction.FORWARD);
         right_front.setDirection(DcMotorSimple.Direction.REVERSE);
         right_back.setDirection(DcMotorSimple.Direction.REVERSE);
 
