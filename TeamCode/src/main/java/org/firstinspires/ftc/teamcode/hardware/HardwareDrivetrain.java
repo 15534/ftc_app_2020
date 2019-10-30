@@ -39,6 +39,7 @@ public class HardwareDrivetrain
     /* Public OpMode members. */
     public DcMotor left_front, right_front, right_back, left_back;
     public DcMotor verticalLeft, verticalRight, horizontal;
+    public DcMotor left_intake, right_intake;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
@@ -51,10 +52,14 @@ public class HardwareDrivetrain
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hardwareMap) {
+        // drive motors
         right_front = hardwareMap.dcMotor.get(HardwareNames.right_front);
         right_back = hardwareMap.dcMotor.get(HardwareNames.right_back);
         left_front = hardwareMap.dcMotor.get(HardwareNames.left_front);
         left_back = hardwareMap.dcMotor.get(HardwareNames.left_back);
+
+        left_intake = hardwareMap.dcMotor.get(HardwareNames.left_intake);
+        right_intake = hardwareMap.dcMotor.get(HardwareNames.right_intake);
 
         verticalLeft = hardwareMap.dcMotor.get(HardwareNames.left_encoder);
         verticalRight = hardwareMap.dcMotor.get(HardwareNames.right_encoder);
@@ -87,6 +92,13 @@ public class HardwareDrivetrain
         left_back.setDirection(DcMotorSimple.Direction.REVERSE);
         right_front.setDirection(DcMotorSimple.Direction.FORWARD);
         right_back.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        // intake
+        left_intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        right_intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
 
     }
  }

@@ -64,7 +64,8 @@ public class FieldCentricDriving extends LinearOpMode {
     ElapsedTime strafe_left_accel = new ElapsedTime();
     double millisecondsToFullSpeed = 600;
     double speedAdjust = 0;
-    double leftSpeed, rightSpeed, leftBackSpeed, rightBackSpeed, leftFrontSpeed, rightFrontSpeed;
+    double leftSpeed, rightSpeed, leftBackSpeed, rightBackSpeed, leftFrontSpeed, rightFrontSpeed,
+            intakeSpeed;
     private OdometryGlobalCoordinatePosition globalPositionUpdate;
 
     @Override
@@ -119,11 +120,25 @@ public class FieldCentricDriving extends LinearOpMode {
                 rotate_accel.reset();
             }
 
+            // intake/outtake
+            if (gamepad1.a) {
+                // intake
+                intakeSpeed = 1;
+            } else if (gamepad1.b) {
+                // outtake
+                intakeSpeed = -1;
+            } else if (gamepad1.x) {
+                intakeSpeed = 0;
+            }
+
             // set motor powers
             robot.left_back.setPower(leftBackSpeed);
             robot.left_front.setPower(leftFrontSpeed);
             robot.right_back.setPower(rightBackSpeed);
             robot.right_front.setPower(rightFrontSpeed);
+
+            robot.right_intake.setPower(intakeSpeed);
+            robot.left_intake.setPower(intakeSpeed);
 
             // update telemetry
             telemetry.addData("leftBack", leftBackSpeed);

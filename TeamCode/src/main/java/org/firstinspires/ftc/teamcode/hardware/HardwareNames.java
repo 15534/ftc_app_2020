@@ -5,6 +5,8 @@ public class HardwareNames {
     public static final String left_front = "left_front";
     public static final String left_back = "left_back";
     public static final String right_back = "right_back";
+    public static final String left_intake = "left_intake";
+    public static final String right_intake = "right_intake";
 
     public static final String left_encoder = left_front;
     public static final String right_encoder = right_front;
