@@ -83,9 +83,11 @@ public class HardwareDrivetrain
         left_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         left_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        left_front.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_front.setDirection(DcMotorSimple.Direction.REVERSE);
-        right_back.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_front.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_back.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_front.setDirection(DcMotorSimple.Direction.FORWARD);
+        right_back.setDirection(DcMotorSimple.Direction.FORWARD);
+
     }
  }
 

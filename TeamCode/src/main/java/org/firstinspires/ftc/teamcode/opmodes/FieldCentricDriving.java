@@ -34,6 +34,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
+import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
+import org.firstinspires.ftc.teamcode.math.MathFunctions;
+import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
@@ -49,7 +52,7 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="FieldCentricDriving", group="TwoMotor")
+@TeleOp(name="Field Centric Driving", group="TwoMotor")
 public class FieldCentricDriving extends LinearOpMode {
 
     /* Declare OpMode members. */
@@ -62,6 +65,7 @@ public class FieldCentricDriving extends LinearOpMode {
     double millisecondsToFullSpeed = 600;
     double speedAdjust = 0;
     double leftSpeed, rightSpeed, leftBackSpeed, rightBackSpeed, leftFrontSpeed, rightFrontSpeed;
+    private OdometryGlobalCoordinatePosition globalPositionUpdate;
 
     @Override
     public void runOpMode() {
@@ -75,6 +79,11 @@ public class FieldCentricDriving extends LinearOpMode {
         telemetry.addData("Say", "Hello Driver");    //
         telemetry.update();
 
+        globalPositionUpdate = new OdometryGlobalCoordinatePosition(robot.verticalLeft, robot.verticalRight,
+                robot.horizontal, HardwareNames.COUNTS_PER_INCH, 75);
+        Thread positionThread = new Thread(globalPositionUpdate);
+        positionThread.start();
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -82,24 +91,25 @@ public class FieldCentricDriving extends LinearOpMode {
         while (opModeIsActive()) {
             leftSpeed = rightSpeed = leftBackSpeed = leftFrontSpeed = rightBackSpeed = rightFrontSpeed = 0;
 
+            // field centric driving (right joystick)
             if (Math.abs(gamepad1.right_stick_y) > THRESHOLD || Math.abs(gamepad1.right_stick_x) > THRESHOLD) {
                 speedAdjust = Math.min(1, accel.milliseconds() / millisecondsToFullSpeed);
-                rightFrontSpeed = gamepad1.right_stick_x + gamepad1.right_stick_y;
-                leftFrontSpeed = -gamepad1.right_stick_x + gamepad1.right_stick_y;
-                rightBackSpeed = leftFrontSpeed;
-                leftBackSpeed = rightFrontSpeed;
 
-                rightFrontSpeed *= 0.5 * speedAdjust; // TODO make faster if possible
-                rightBackSpeed *= 0.5 * speedAdjust;
-                leftBackSpeed *= 0.5 * speedAdjust;
-                leftFrontSpeed *= 0.5 * speedAdjust;
+                double[] maxSpeeds = getMaxSpeeds(gamepad1.right_stick_x, gamepad1.right_stick_y,
+                        globalPositionUpdate.returnOrientation());
+
+                rightFrontSpeed = speedAdjust * maxSpeeds[0];
+                leftFrontSpeed  = speedAdjust * maxSpeeds[1];
+                rightBackSpeed  = speedAdjust * maxSpeeds[2];
+                leftBackSpeed   = speedAdjust * maxSpeeds[3];
 
             } else {
                 accel.reset();
             }
 
+            // rotating (left joystick)
             if (Math.abs(gamepad1.left_stick_x) > THRESHOLD) {
-                leftFrontSpeed = -Math.min(Math.abs(gamepad1.left_stick_x),
+                leftFrontSpeed = Math.min(Math.abs(gamepad1.left_stick_x),
                         rotate_accel.milliseconds() / millisecondsToFullSpeed) * Math.signum(gamepad1.left_stick_x);
 
                 leftBackSpeed = leftFrontSpeed;
@@ -109,17 +119,41 @@ public class FieldCentricDriving extends LinearOpMode {
                 rotate_accel.reset();
             }
 
+            // set motor powers
             robot.left_back.setPower(leftBackSpeed);
             robot.left_front.setPower(leftFrontSpeed);
             robot.right_back.setPower(rightBackSpeed);
             robot.right_front.setPower(rightFrontSpeed);
 
+            // update telemetry
             telemetry.addData("leftBack", leftBackSpeed);
             telemetry.addData("rightBack", rightBackSpeed);
             telemetry.addData("leftFront", leftFrontSpeed);
             telemetry.addData("rightFront", rightFrontSpeed);
-
             telemetry.update();
         }
+    }
+
+    /**
+     * Get maximum possible speeds that the robot can travel at for the specific orientation
+     */
+    private double[] getMaxSpeeds(double joystick_x, double joystick_y, double orientation) {
+        // rf, lf, rb, lb
+        double[] speeds = new double[4];
+        // transform joystick to specific orientation
+        double[] new_joystick_position = MathFunctions.rotatePointCounterClockwise(joystick_x,
+                joystick_y, orientation);
+
+        speeds[1] = new_joystick_position[0] - new_joystick_position[1];
+        speeds[0] = -new_joystick_position[0] - new_joystick_position[1];
+
+
+        double maxSpeed = Math.max(Math.abs(speeds[0]), Math.abs(speeds[1]));
+        speeds[0] /= maxSpeed;
+        speeds[1] /= maxSpeed;
+
+        speeds[2] = speeds[1];
+        speeds[3] = speeds[0];
+        return speeds;
     }
 }

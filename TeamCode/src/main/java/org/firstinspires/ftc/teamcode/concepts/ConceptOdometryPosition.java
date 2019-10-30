@@ -28,14 +28,14 @@ public class ConceptOdometryPosition extends LinearOpMode {
 
         waitForStart();
 
-        //Create and start GlobalCoordinatePosition thread to constantly update the global coordinate positions
+        // Create and start GlobalCoordinatePosition thread to constantly update the global coordinate positions
         globalPositionUpdate = new OdometryGlobalCoordinatePosition(robot.verticalLeft, robot.verticalRight,
                 robot.horizontal, COUNTS_PER_INCH, 75);
         Thread positionThread = new Thread(globalPositionUpdate);
         positionThread.start();
 
         while (opModeIsActive()){
-            //Display Global (x, y, theta) coordinates
+            // Display Global (x, y, theta) coordinates
             telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
             telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
             telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
@@ -50,25 +50,5 @@ public class ConceptOdometryPosition extends LinearOpMode {
 
         // Stop the thread
         globalPositionUpdate.stop();
-    }
-
-    /**
-     * Calculate the power in the x direction
-     * @param desiredAngle angle on the x axis
-     * @param speed robot's speed
-     * @return the x vector
-     */
-    private double calculateX(double desiredAngle, double speed) {
-        return Math.sin(Math.toRadians(desiredAngle)) * speed;
-    }
-
-    /**
-     * Calculate the power in the y direction
-     * @param desiredAngle angle on the y axis
-     * @param speed robot's speed
-     * @return the y vector
-     */
-    private double calculateY(double desiredAngle, double speed) {
-        return Math.cos(Math.toRadians(desiredAngle)) * speed;
     }
 }
