@@ -52,10 +52,6 @@ public class OdometryGlobalCoordinatePosition implements Runnable {
 
         robotEncoderWheelDistance = Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim()) * COUNTS_PER_INCH;
         this.horizontalEncoderTickPerDegreeOffset = Double.parseDouble(ReadWriteFile.readFile(horizontalTickOffsetFile).trim());
-
-        reverseLeftEncoder();
-        reverseRightEncoder();
-        reverseNormalEncoder();
     }
 
     /**
@@ -76,7 +72,9 @@ public class OdometryGlobalCoordinatePosition implements Runnable {
         // Get the components of the motion
         normalEncoderWheelPosition = (horizontalEncoder.getCurrentPosition()*normalEncoderPositionMultiplier);
         double rawHorizontalChange = normalEncoderWheelPosition - prevNormalEncoderWheelPosition;
-        double horizontalChange = rawHorizontalChange - (changeInRobotOrientation*horizontalEncoderTickPerDegreeOffset);
+
+        // TODO check this!
+        double horizontalChange = rawHorizontalChange + (changeInRobotOrientation*horizontalEncoderTickPerDegreeOffset);
 
         double p = ((rightChange + leftChange) / 2);
         double n = horizontalChange;
@@ -113,28 +111,16 @@ public class OdometryGlobalCoordinatePosition implements Runnable {
      */
     public void stop(){ isRunning = false; }
 
-    public void reverseLeftEncoder(){
-        if(verticalLeftEncoderPositionMultiplier == 1){
-            verticalLeftEncoderPositionMultiplier = -1;
-        }else{
-            verticalLeftEncoderPositionMultiplier = 1;
-        }
+    public double horizontalEncoderPosition() {
+        return normalEncoderWheelPosition;
     }
 
-    public void reverseRightEncoder(){
-        if(verticalRightEncoderPositionMultiplier == 1){
-            verticalRightEncoderPositionMultiplier = -1;
-        }else{
-            verticalRightEncoderPositionMultiplier = 1;
-        }
+    public double leftEncoderPosition() {
+        return verticalLeftEncoderWheelPosition;
     }
 
-    public void reverseNormalEncoder(){
-        if(normalEncoderPositionMultiplier == 1){
-            normalEncoderPositionMultiplier = -1;
-        }else{
-            normalEncoderPositionMultiplier = 1;
-        }
+    public double rightEncoderPosition() {
+        return verticalRightEncoderWheelPosition;
     }
 
     /**

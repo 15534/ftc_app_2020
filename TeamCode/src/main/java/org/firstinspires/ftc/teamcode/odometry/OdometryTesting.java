@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.odometry;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -36,7 +36,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
 import org.firstinspires.ftc.teamcode.math.MathFunctions;
-import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
@@ -52,8 +51,8 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Field Centric Driving", group="TwoMotor")
-public class FieldCentricDriving extends LinearOpMode {
+@TeleOp(name="Odometry Testing", group="TwoMotor")
+public class OdometryTesting extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareDrivetrain robot = new HardwareDrivetrain();
@@ -92,18 +91,21 @@ public class FieldCentricDriving extends LinearOpMode {
         while (opModeIsActive()) {
             leftSpeed = rightSpeed = leftBackSpeed = leftFrontSpeed = rightBackSpeed = rightFrontSpeed = 0;
 
-            // field centric driving (right joystick)
-            if (Math.abs(gamepad1.right_stick_y) > THRESHOLD || Math.abs(gamepad1.right_stick_x) > THRESHOLD) {
-                speedAdjust = Math.min(1, accel.milliseconds() / millisecondsToFullSpeed);
-
-                double[] maxSpeeds = getMaxSpeeds(gamepad1.right_stick_x, gamepad1.right_stick_y,
-                        globalPositionUpdate.returnOrientation());
-
-                rightFrontSpeed = speedAdjust * maxSpeeds[0];
-                leftFrontSpeed  = speedAdjust * maxSpeeds[1];
-                rightBackSpeed  = speedAdjust * maxSpeeds[2];
-                leftBackSpeed   = speedAdjust * maxSpeeds[3];
-
+            // movement with dpad
+            if (gamepad1.dpad_up) {
+                speedAdjust = Math.min(0.3, accel.milliseconds() / millisecondsToFullSpeed);
+                rightFrontSpeed = leftFrontSpeed = leftBackSpeed = rightBackSpeed = speedAdjust;
+            } else if (gamepad1.dpad_down) {
+                speedAdjust = Math.min(0.3, accel.milliseconds() / millisecondsToFullSpeed);
+                rightFrontSpeed = leftFrontSpeed = rightBackSpeed = leftBackSpeed = -speedAdjust;
+            } else if (gamepad1.dpad_left) {
+                speedAdjust = Math.min(0.3, accel.milliseconds() / millisecondsToFullSpeed);
+                rightFrontSpeed = leftBackSpeed = speedAdjust;
+                leftFrontSpeed = rightBackSpeed = -speedAdjust;
+            } else if (gamepad1.dpad_right) {
+                speedAdjust = Math.min(0.3, accel.milliseconds() / millisecondsToFullSpeed);
+                rightFrontSpeed = leftBackSpeed = -speedAdjust;
+                leftFrontSpeed = rightBackSpeed = speedAdjust;
             } else {
                 accel.reset();
             }
@@ -118,17 +120,6 @@ public class FieldCentricDriving extends LinearOpMode {
                 rightFrontSpeed = rightBackSpeed;
             } else {
                 rotate_accel.reset();
-            }
-
-            // intake/outtake
-            if (gamepad1.a) {
-                // intake
-                intakeSpeed = 1;
-            } else if (gamepad1.b) {
-                // outtake
-                intakeSpeed = -1;
-            } else if (gamepad1.x) {
-                intakeSpeed = 0;
             }
 
             // set motor powers
@@ -146,12 +137,12 @@ public class FieldCentricDriving extends LinearOpMode {
             telemetry.addData("leftFront", leftFrontSpeed);
             telemetry.addData("rightFront", rightFrontSpeed);
 
-//            telemetry.addData("orientation", globalPositionUpdate.returnOrientation());
-//            telemetry.addData("x", globalPositionUpdate.returnXCoordinate());
-//            telemetry.addData("y", globalPositionUpdate.returnYCoordinate());
-//            telemetry.addData("left", globalPositionUpdate.leftEncoderPosition());
-//            telemetry.addData("right", globalPositionUpdate.rightEncoderPosition());
-//            telemetry.addData("horizontal", globalPositionUpdate.horizontalEncoderPosition());
+            telemetry.addData("orientation", globalPositionUpdate.returnOrientation());
+            telemetry.addData("x", globalPositionUpdate.returnXCoordinate() / HardwareNames.COUNTS_PER_INCH);
+            telemetry.addData("y", globalPositionUpdate.returnYCoordinate() / HardwareNames.COUNTS_PER_INCH);
+            telemetry.addData("left", globalPositionUpdate.leftEncoderPosition());
+            telemetry.addData("right", globalPositionUpdate.rightEncoderPosition());
+            telemetry.addData("horizontal", globalPositionUpdate.horizontalEncoderPosition());
 
             telemetry.update();
         }
