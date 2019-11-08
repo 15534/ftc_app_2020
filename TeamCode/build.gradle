@@ -27,4 +27,8 @@ dependencies {
     stockImplementation 'org.openftc:hardware-stock:5.2'
     stockImplementation 'org.openftc:robotcore-stock:5.2'
     stockImplementation 'org.openftc:ftccommon-stock:5.2'
+
+    implementation 'com.acmerobotics.roadrunner:core:0.4.6'
+    implementation 'com.acmerobotics.dashboard:dashboard:0.3.4'
+    implementation 'org.openftc:rev-extensions-2:1.2'
 }

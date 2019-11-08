@@ -47,6 +47,8 @@ dependencies {
     stockImplementation 'org.openftc:robotserver-stock:5.2'
     stockImplementation 'com.android.support:support-compat:26.0.0'
 
+    implementation 'com.acmerobotics.dashboard:dashboard:0.3.4'
+
     /*
      * Things needed regardless of turbo/extremeTurbo/stock
      */
