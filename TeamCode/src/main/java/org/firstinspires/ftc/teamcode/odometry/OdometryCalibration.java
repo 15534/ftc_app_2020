@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
 
 import java.io.File;
@@ -22,6 +21,12 @@ import java.io.File;
  */
 @TeleOp(name = "Odometry System Calibration", group = "Calibration")
 public class OdometryCalibration extends LinearOpMode {
+    // Drive motors
+    DcMotor right_front, right_back, left_front, left_back;
+
+    // Odometry Wheels
+    DcMotor verticalLeft, verticalRight, horizontal;
+
     //IMU Sensor
     BNO055IMU imu;
 
@@ -38,9 +43,12 @@ public class OdometryCalibration extends LinearOpMode {
     File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
     File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
 
-    private HardwareDrivetrain robot = new HardwareDrivetrain();
     @Override
     public void runOpMode() throws InterruptedException {
+        initHardwareMap(HardwareNames.right_front, HardwareNames.right_back,
+                HardwareNames.left_front, HardwareNames.left_back,
+                HardwareNames.left_encoder, HardwareNames.right_encoder,
+                HardwareNames.horizontal_encoder);
 
         // Initialize IMU hardware map value. PLEASE UPDATE THIS VALUE TO MATCH YOUR CONFIGURATION
         imu = hardwareMap.get(BNO055IMU.class, HardwareNames.imu);
@@ -58,7 +66,6 @@ public class OdometryCalibration extends LinearOpMode {
         telemetry.clear();
 
         // Odometry System Calibration Init Complete
-        robot.init(hardwareMap);
         telemetry.addData("Odometry System Calibration Status", "Init Complete");
         telemetry.update();
 
@@ -66,7 +73,11 @@ public class OdometryCalibration extends LinearOpMode {
 
         //Begin calibration (if robot is unable to pivot at these speeds, please adjust the constant at the top of the code
         while(getZAngle() < 90 && opModeIsActive()){
-            setPowerAll(-PIVOT_SPEED, -PIVOT_SPEED, PIVOT_SPEED, PIVOT_SPEED);
+            if(getZAngle() < 60) {
+                setPowerAll(PIVOT_SPEED, PIVOT_SPEED, -PIVOT_SPEED, -PIVOT_SPEED);
+            }else{
+                setPowerAll(PIVOT_SPEED/2, PIVOT_SPEED/2, -PIVOT_SPEED/2, -PIVOT_SPEED/2);
+            }
 
             telemetry.addData("IMU Angle", getZAngle());
             telemetry.update();
@@ -88,13 +99,13 @@ public class OdometryCalibration extends LinearOpMode {
         Since the left encoder is also mapped to a drive motor, the encoder value needs to be reversed with the negative sign in front
         THIS MAY NEED TO BE CHANGED FOR EACH ROBOT
        */
-        double encoderDifference = Math.abs(robot.verticalLeft.getCurrentPosition()) + (Math.abs(robot.verticalRight.getCurrentPosition()));
+        double encoderDifference = Math.abs(verticalLeft.getCurrentPosition()) + (Math.abs(verticalRight.getCurrentPosition()));
 
         double verticalEncoderTickOffsetPerDegree = encoderDifference/angle;
 
         double wheelBaseSeparation = (2*90*verticalEncoderTickOffsetPerDegree)/(Math.PI*COUNTS_PER_INCH);
 
-        horizontalTickOffset = -robot.horizontal.getCurrentPosition()/Math.toRadians(getZAngle());
+        horizontalTickOffset = -horizontal.getCurrentPosition()/Math.toRadians(getZAngle());
 
         //Write the constants to text files
         ReadWriteFile.writeFile(wheelBaseSeparationFile, String.valueOf(wheelBaseSeparation));
@@ -108,14 +119,58 @@ public class OdometryCalibration extends LinearOpMode {
 
             //Display raw values
             telemetry.addData("IMU Angle", getZAngle());
-            telemetry.addData("Vertical Left Position", robot.verticalLeft.getCurrentPosition());
-            telemetry.addData("Vertical Right Position", robot.verticalRight.getCurrentPosition());
-            telemetry.addData("Horizontal Position", robot.horizontal.getCurrentPosition());
+            telemetry.addData("Vertical Left Position", -verticalLeft.getCurrentPosition());
+            telemetry.addData("Vertical Right Position", verticalRight.getCurrentPosition());
+            telemetry.addData("Horizontal Position", horizontal.getCurrentPosition());
             telemetry.addData("Vertical Encoder Offset", verticalEncoderTickOffsetPerDegree);
 
             //Update values
             telemetry.update();
         }
+    }
+
+    private void initHardwareMap(String rfName, String rbName, String lfName, String lbName, String vlEncoderName, String vrEncoderName, String hEncoderName){
+        right_front = hardwareMap.dcMotor.get(rfName);
+        right_back = hardwareMap.dcMotor.get(rbName);
+        left_front = hardwareMap.dcMotor.get(lfName);
+        left_back = hardwareMap.dcMotor.get(lbName);
+
+        verticalLeft = hardwareMap.dcMotor.get(vlEncoderName);
+        verticalRight = hardwareMap.dcMotor.get(vrEncoderName);
+        horizontal = hardwareMap.dcMotor.get(hEncoderName);
+
+        right_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_back.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_back.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        right_front.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        right_back.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        left_front.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        left_back.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        verticalLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        verticalRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        verticalLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        verticalRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        horizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        right_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        right_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        left_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        left_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        left_front.setDirection(DcMotorSimple.Direction.FORWARD);
+        right_front.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_back.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+        telemetry.addData("Status", "Hardware Map Init Complete");
+        telemetry.update();
+
     }
 
     /**
@@ -134,10 +189,10 @@ public class OdometryCalibration extends LinearOpMode {
      * @param lb power for left back motor
      */
     private void setPowerAll(double rf, double rb, double lf, double lb){
-        robot.right_front.setPower(rf);
-        robot.right_back.setPower(rb);
-        robot.left_front.setPower(lf);
-        robot.left_back.setPower(lb);
+        right_front.setPower(rf);
+        right_back.setPower(rb);
+        left_front.setPower(lf);
+        left_back.setPower(lb);
     }
 
 }

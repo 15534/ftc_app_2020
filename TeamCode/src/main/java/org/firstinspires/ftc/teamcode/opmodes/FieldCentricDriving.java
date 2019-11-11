@@ -145,14 +145,6 @@ public class FieldCentricDriving extends LinearOpMode {
             telemetry.addData("rightBack", rightBackSpeed);
             telemetry.addData("leftFront", leftFrontSpeed);
             telemetry.addData("rightFront", rightFrontSpeed);
-
-//            telemetry.addData("orientation", globalPositionUpdate.returnOrientation());
-//            telemetry.addData("x", globalPositionUpdate.returnXCoordinate());
-//            telemetry.addData("y", globalPositionUpdate.returnYCoordinate());
-//            telemetry.addData("left", globalPositionUpdate.leftEncoderPosition());
-//            telemetry.addData("right", globalPositionUpdate.rightEncoderPosition());
-//            telemetry.addData("horizontal", globalPositionUpdate.horizontalEncoderPosition());
-
             telemetry.update();
         }
     }
