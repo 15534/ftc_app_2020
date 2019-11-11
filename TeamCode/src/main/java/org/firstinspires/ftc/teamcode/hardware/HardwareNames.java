@@ -14,6 +14,8 @@ public class HardwareNames {
 
     public static final String imu = "imu";
 
+    public static final String test_servo = "test_servo";
+
     public static final double COUNTS_PER_INCH = 200.7;
 
 }
