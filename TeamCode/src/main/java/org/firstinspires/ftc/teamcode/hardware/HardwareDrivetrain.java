@@ -32,7 +32,10 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Hardware;
 
 public class HardwareDrivetrain
 {
@@ -40,6 +43,9 @@ public class HardwareDrivetrain
     public DcMotor left_front, right_front, right_back, left_back;
     public DcMotor verticalLeft, verticalRight, horizontal;
     public DcMotor left_intake, right_intake;
+
+    public Servo push_servo, gripper_servo, left_v4b, right_v4b;
+    public PwmControl left_v4b_pwm, right_v4b_pwm;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
@@ -52,6 +58,26 @@ public class HardwareDrivetrain
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hardwareMap) {
+        // servos
+        push_servo = hardwareMap.servo.get(HardwareNames.push_servo);
+        gripper_servo = hardwareMap.servo.get(HardwareNames.gripper_servo);
+
+        left_v4b = hardwareMap.servo.get(HardwareNames.left_v4b);
+        right_v4b = hardwareMap.servo.get(HardwareNames.right_v4b);
+        left_v4b.setDirection(Servo.Direction.REVERSE);
+        right_v4b.setDirection(Servo.Direction.FORWARD);
+
+        left_v4b.scaleRange(0, 1);
+        right_v4b.scaleRange(0, 1);
+
+        left_v4b_pwm = (PwmControl) left_v4b;
+        right_v4b_pwm = (PwmControl) right_v4b;
+
+        PwmControl.PwmRange range = new PwmControl.PwmRange(800, 2200);
+        left_v4b_pwm.setPwmRange(range);
+        right_v4b_pwm.setPwmRange(range);
+
+
         // drive motors
         right_front = hardwareMap.dcMotor.get(HardwareNames.right_front);
         right_back = hardwareMap.dcMotor.get(HardwareNames.right_back);
@@ -94,8 +120,8 @@ public class HardwareDrivetrain
         right_back.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // intake
-        left_intake.setDirection(DcMotorSimple.Direction.REVERSE);
-        right_intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        right_intake.setDirection(DcMotorSimple.Direction.REVERSE);
         left_intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right_intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 

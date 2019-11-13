@@ -15,7 +15,6 @@ public class HardwareServo {
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hwMap) {
         hardwareMap = hwMap;
-        // TODO disable this hardware
         left_servo  = hardwareMap.get(Servo.class, HardwareNames.push_servo);
     }
 }

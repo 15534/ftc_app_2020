@@ -70,10 +70,12 @@ public class TeleOp extends LinearOpMode {
     ElapsedTime right_trigger_time = null;
     boolean start_button_pressed = false;
     private double DPAD_SPEED = 0.35;
-    private double BUMPER_ROTATION_SPEED = 0.25;
+    private double BUMPER_ROTATION_SPEED = 0.4;
     private double FCD_ROTATION_SPEED = 0.8;
     ElapsedTime dpad_accel = new ElapsedTime();
     ElapsedTime bumper_rotate_accel = new ElapsedTime();
+
+    ElapsedTime stack_routine_time = null;
 
     private String mode = "MODE_FCD";
 
@@ -146,7 +148,7 @@ public class TeleOp extends LinearOpMode {
             // rotate using bumpers
             if (gamepad1.left_bumper || gamepad1.right_bumper) {
                 double bumperRotationSpeed = Math.min(BUMPER_ROTATION_SPEED,
-                        rotate_accel.milliseconds() / millisecondsToFullSpeed);
+                        bumper_rotate_accel.milliseconds() / millisecondsToFullSpeed);
 
                 if (gamepad1.left_bumper) {
                     leftBackSpeed = leftFrontSpeed = -bumperRotationSpeed;
@@ -236,10 +238,10 @@ public class TeleOp extends LinearOpMode {
             // intake/outtake
             if (gamepad1.a || gamepad2.a) {
                 // intake
-                intakeSpeed = 1;
+                intakeSpeed = 0.6;
             } else if (gamepad1.b || gamepad2.b) {
                 // outtake
-                intakeSpeed = -1;
+                intakeSpeed = -0.6;
             } else if (gamepad1.x || gamepad2.x) {
                 // stop intake
                 intakeSpeed = 0;
@@ -248,6 +250,26 @@ public class TeleOp extends LinearOpMode {
             // reset orientation
             if (gamepad1.y) {
                 globalPositionUpdate.setOrientation(0);
+            }
+
+            // gamepad 2
+            if (stack_routine_time == null && gamepad2.dpad_up) {
+                stack_routine_time = new ElapsedTime();
+            }
+            if (stack_routine_time != null) {
+                if (stack_routine_time.milliseconds() < 500) {
+                    robot.push_servo.setPosition(1);
+                } else if (stack_routine_time.milliseconds() < 1000) {
+                    robot.push_servo.setPosition(0.35);
+                } else if (stack_routine_time.milliseconds() < 1300) {
+                    robot.left_v4b.setPosition(0.7);
+                    robot.right_v4b.setPosition(0.7);
+                } else if (stack_routine_time.milliseconds() < 1600) {
+                    robot.gripper_servo.setPosition(0.7);
+                } else if (stack_routine_time.milliseconds() < 2000) {
+                    robot.left_v4b.setPosition(0.22);
+                    robot.right_v4b.setPosition(0.22);
+                }
             }
 
             // set motor powers
