@@ -19,4 +19,12 @@ public class MathFunctions {
         double newY = x * Math.sin(theta) + y * Math.cos(theta);
         return new double[] {newX, newY};
     }
+
+    public static double absMax(double... doubles) {
+        double max = 0;
+        for (double d : doubles) {
+            max = Math.max(max, Math.abs(d));
+        }
+        return max;
+    }
 }

@@ -108,6 +108,10 @@ public class OdometryGlobalCoordinatePosition implements Runnable {
      */
     public double returnOrientation(){ return Math.toDegrees(robotOrientationRadians) % 360; }
 
+    public void setOrientation(double orientationRadians) {
+        robotOrientationRadians = orientationRadians;
+    }
+
     /**
      * Stops the position update thread
      */
