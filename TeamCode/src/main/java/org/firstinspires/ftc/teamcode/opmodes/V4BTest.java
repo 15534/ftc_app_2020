@@ -90,8 +90,11 @@ public class V4BTest extends LinearOpMode {
 //                double newRightPosition = Math.min(currentLeftPosition - 0.01, 0);
 //                robot.left_v4b.setPosition(newLeftPosition);
 //                robot.right_v4b.setPosition(newRightPosition);
-                robot.left_v4b.setPosition(0.68);
-                robot.right_v4b.setPosition(0.68);
+//                robot.left_v4b.setPosition(0.68);
+//                robot.right_v4b.setPosition(0.68);
+                robot.left_v4b.setPosition(0.5);
+                robot.right_v4b.setPosition(0.5);
+
             }
 //
             telemetry.addData("left position:", currentLeftPosition);
