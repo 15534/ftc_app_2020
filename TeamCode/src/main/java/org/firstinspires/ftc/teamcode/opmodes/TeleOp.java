@@ -378,6 +378,10 @@ public class TeleOp extends LinearOpMode {
                 double pusherPosition = 0.7 * gamepad2.left_stick_y + 0.3;
                 robot.push_servo.setPosition(pusherPosition);
             }
+            if (gamepad2.left_stick_y < -0.1) {
+                double pusherPosition = 1- (0.7 * (-gamepad2.left_stick_y) + 0.3);
+                robot.push_servo.setPosition(pusherPosition);
+            }
 
             // set motor powers
             robot.left_back.setPower(leftBackSpeed);
