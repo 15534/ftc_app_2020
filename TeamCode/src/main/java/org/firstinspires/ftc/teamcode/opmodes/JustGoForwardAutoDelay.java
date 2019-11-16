@@ -30,14 +30,10 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
-import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
-import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
 
 /**
  * This file illustrates the concept of driving a path based on time.
@@ -60,8 +56,8 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Just Go Forward")
-public class JustGoForwardAuto extends LinearOpMode {
+@Autonomous(name="Just Go Forward with Delay")
+public class JustGoForwardAutoDelay extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareDrivetrain         robot   = new HardwareDrivetrain();
@@ -87,6 +83,8 @@ public class JustGoForwardAuto extends LinearOpMode {
         waitForStart();
 
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
+
+        sleep(25000);
 
         // Step 1:  Drive forward for 3 seconds
         robot.left_back.setPower(FORWARD_SPEED);

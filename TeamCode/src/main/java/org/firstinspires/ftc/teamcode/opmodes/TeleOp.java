@@ -83,6 +83,7 @@ public class TeleOp extends LinearOpMode {
     ElapsedTime gf_drop_routine_time = null;
 
     private String mode = "MODE_TANK";
+    private boolean stickControllingPusher = false;
 
     @Override
     public void runOpMode() {
@@ -130,32 +131,25 @@ public class TeleOp extends LinearOpMode {
 
             // speed adjust
             // decrease speed
-            if (gamepad1.left_trigger > 0.3) {
-                if (left_trigger_time == null) {
-                    left_trigger_time = new ElapsedTime();
-                } else if (left_trigger_time.milliseconds() > 500) {
-                    drivetrainSpeedAdjust = 2;
-                }
+            if (gamepad1.left_trigger > 0.2) {
+                drivetrainSpeedAdjust = 3;
             } else {
-                if (left_trigger_time != null) {
-                    drivetrainSpeedAdjust = Math.max(2, drivetrainSpeedAdjust - 1);
-                    left_trigger_time = null;
-                }
+                drivetrainSpeedAdjust = 5;
             }
-
-            // increase speed
-            if (gamepad1.right_trigger > 0.3) {
-                if (right_trigger_time == null) {
-                    right_trigger_time = new ElapsedTime();
-                } else if (right_trigger_time.milliseconds() > 500) {
-                    drivetrainSpeedAdjust = 5;
-                }
-            } else {
-                if (right_trigger_time != null) {
-                    drivetrainSpeedAdjust = Math.min(5, drivetrainSpeedAdjust + 1);
-                    right_trigger_time = null;
-                }
-            }
+//
+//            // increase speed
+//            if (gamepad1.right_trigger > 0.3) {
+//                if (right_trigger_time == null) {
+//                    right_trigger_time = new ElapsedTime();
+//                } else if (right_trigger_time.milliseconds() > 500) {
+//                    drivetrainSpeedAdjust = 5;
+//                }
+//            } else {
+//                if (right_trigger_time != null) {
+//                    drivetrainSpeedAdjust = Math.min(5, drivetrainSpeedAdjust + 1);
+//                    right_trigger_time = null;
+//                }
+//            }
 
             telemetry.addData("speed", drivetrainSpeedAdjust * 20);
 
@@ -235,9 +229,9 @@ public class TeleOp extends LinearOpMode {
                 rightFrontSpeed = rightBackSpeed = -drivetrainSpeedAdjust * gamepad1.right_stick_y / 5;
 
                 // strafe
-                if (gamepad1.left_bumper || gamepad1.right_bumper || gamepad1.dpad_down
-                        || gamepad1.dpad_up || gamepad1.dpad_left || gamepad1.dpad_right) {
-                    double strafeSpeed = Math.min(drivetrainSpeedAdjust / 5.0, strafe_accel.milliseconds() / millisecondsToFullSpeed);
+                if (gamepad1.left_bumper || gamepad1.right_bumper) {
+//                    double strafeSpeed = Math.min(drivetrainSpeedAdjust / 5.0, strafe_accel.milliseconds() / millisecondsToFullSpeed);
+                    double strafeSpeed = drivetrainSpeedAdjust / 5.0;
 
                     if (gamepad1.left_bumper) {
                         leftFrontSpeed = rightBackSpeed = -strafeSpeed;
@@ -276,15 +270,19 @@ public class TeleOp extends LinearOpMode {
             if (gamepad1.a || gamepad2.a) {
                 // intake
                 intakeSpeed = 0.6;
-                lastIntakeButton = "a";
+                lastIntakeButton = "on";
             } else if (gamepad1.b || gamepad2.b) {
                 // outtake
                 intakeSpeed = -0.3;
-                lastIntakeButton = "b";
-            } else if (gamepad1.x || gamepad2.x || lastIntakeButton.equals("b")) {
+                lastIntakeButton = "temp";
+            } else if (gamepad2.y) {
+                // intake fast
+                intakeSpeed = 1;
+                lastIntakeButton = "temp";
+            } else if (gamepad1.x || gamepad2.x || lastIntakeButton.equals("temp")) {
                 // stop intake
                 intakeSpeed = 0;
-                lastIntakeButton = "x";
+                lastIntakeButton = "stop";
             }
 
             // reset orientation
@@ -329,12 +327,12 @@ public class TeleOp extends LinearOpMode {
                     robot.left_v4b.setPosition(0.5);
                     robot.right_v4b.setPosition(0.5);
                 } else if (drop_routine_time.milliseconds() < 1500) {
-                    robot.push_servo.setPosition(0.35);
+                    robot.push_servo.setPosition(0.3);
                 } else if (drop_routine_time.milliseconds() < 2000) {
                     robot.left_v4b.setPosition(0.6);
                     robot.right_v4b.setPosition(0.6);
                     intakeSpeed = 0.6;
-                    lastIntakeButton = "a";
+                    lastIntakeButton = "on";
                 } else {
                     drop_routine_time = null;
                 }
@@ -364,7 +362,7 @@ public class TeleOp extends LinearOpMode {
                     robot.left_v4b.setPosition(0.5);
                     robot.right_v4b.setPosition(0.5);
                 } else if (gf_drop_routine_time.milliseconds() < 3000) {
-                    robot.push_servo.setPosition(0.35);
+                    robot.push_servo.setPosition(0.3);
                 } else if (gf_drop_routine_time.milliseconds() < 3500) {
                     robot.left_v4b.setPosition(0.6);
                     robot.right_v4b.setPosition(0.6);
@@ -373,6 +371,12 @@ public class TeleOp extends LinearOpMode {
                 } else {
                     gf_drop_routine_time = null;
                 }
+            }
+
+            // left joystick - control pusher
+            if (gamepad2.left_stick_y > 0.1) {
+                double pusherPosition = 0.7 * gamepad2.left_stick_y + 0.3;
+                robot.push_servo.setPosition(pusherPosition);
             }
 
             // set motor powers
