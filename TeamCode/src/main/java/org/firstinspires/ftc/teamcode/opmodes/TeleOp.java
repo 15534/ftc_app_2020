@@ -80,6 +80,7 @@ public class TeleOp extends LinearOpMode {
 
     ElapsedTime stack_routine_time = null;
     ElapsedTime drop_routine_time = null;
+    ElapsedTime gf_drop_routine_time = null;
 
     private String mode = "MODE_TANK";
 
@@ -278,7 +279,7 @@ public class TeleOp extends LinearOpMode {
                 lastIntakeButton = "a";
             } else if (gamepad1.b || gamepad2.b) {
                 // outtake
-                intakeSpeed = -0.2;
+                intakeSpeed = -0.3;
                 lastIntakeButton = "b";
             } else if (gamepad1.x || gamepad2.x || lastIntakeButton.equals("b")) {
                 // stop intake
@@ -330,7 +331,8 @@ public class TeleOp extends LinearOpMode {
                 } else if (drop_routine_time.milliseconds() < 1500) {
                     robot.push_servo.setPosition(0.35);
                 } else if (drop_routine_time.milliseconds() < 2000) {
-                    robot.push_servo.setPosition(0.6);
+                    robot.left_v4b.setPosition(0.6);
+                    robot.right_v4b.setPosition(0.6);
                     intakeSpeed = 0.6;
                     lastIntakeButton = "a";
                 } else {
@@ -338,7 +340,40 @@ public class TeleOp extends LinearOpMode {
                 }
             }
 
-            // k
+            // gf drop routine
+            if (gf_drop_routine_time == null && gamepad2.dpad_right) {
+                gf_drop_routine_time = new ElapsedTime();
+            }
+            if (gf_drop_routine_time != null) {
+                if (gf_drop_routine_time.milliseconds() < 300) {
+                    robot.push_servo.setPosition(0.35);
+                    robot.gripper_servo.setPosition(1);
+                } else if (gf_drop_routine_time.milliseconds() < 600) {
+                    robot.push_servo.setPosition(1);
+                } else if (gf_drop_routine_time.milliseconds() < 900) {
+                    robot.left_v4b.setPosition(0.75);
+                    robot.right_v4b.setPosition(0.75);
+                } else if (gf_drop_routine_time.milliseconds() < 1200) {
+                    robot.gripper_servo.setPosition(0.6);
+                } else if (gf_drop_routine_time.milliseconds() < 1500) {
+                    robot.left_v4b.setPosition(0);
+                    robot.right_v4b.setPosition(0);
+                } else if (gf_drop_routine_time.milliseconds() < 1800) {
+                    robot.gripper_servo.setPosition(1);
+                } else if (gf_drop_routine_time.milliseconds() < 2100) {
+                    robot.left_v4b.setPosition(0.5);
+                    robot.right_v4b.setPosition(0.5);
+                } else if (gf_drop_routine_time.milliseconds() < 3000) {
+                    robot.push_servo.setPosition(0.35);
+                } else if (gf_drop_routine_time.milliseconds() < 3500) {
+                    robot.left_v4b.setPosition(0.6);
+                    robot.right_v4b.setPosition(0.6);
+                    intakeSpeed = 0.6;
+                    lastIntakeButton = "a";
+                } else {
+                    gf_drop_routine_time = null;
+                }
+            }
 
             // set motor powers
             robot.left_back.setPower(leftBackSpeed);
