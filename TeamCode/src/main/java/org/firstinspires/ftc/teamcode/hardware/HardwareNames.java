@@ -8,8 +8,8 @@ public class HardwareNames {
     public static final String left_intake = "left_intake";
     public static final String right_intake = "right_intake";
 
-    public static final String left_encoder = left_front;
-    public static final String right_encoder = right_front;
+    public static final String left_encoder = right_front;
+    public static final String right_encoder = left_front;
     public static final String horizontal_encoder = left_back;
 
     public static final String imu = "imu";
