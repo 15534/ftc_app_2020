@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Config
 public class VertexLocalizer extends ThreeTrackingWheelLocalizer {
-    public static double TICKS_PER_REV = 0;
+    public static double TICKS_PER_REV = 360 * 4;
     public static double WHEEL_RADIUS = 1.14173; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
@@ -41,8 +41,8 @@ public class VertexLocalizer extends ThreeTrackingWheelLocalizer {
 
     public VertexLocalizer(HardwareMap hardwareMap) {
         super(Arrays.asList(
-                new Pose2d(0, LATERAL_DISTANCE / 2, 0), // left
-                new Pose2d(0, -LATERAL_DISTANCE / 2, 0), // right
+                new Pose2d(0, LATERAL_DISTANCE / 2, Math.toRadians(180)), // left
+                new Pose2d(0, -LATERAL_DISTANCE / 2, Math.toRadians(180)), // right
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 

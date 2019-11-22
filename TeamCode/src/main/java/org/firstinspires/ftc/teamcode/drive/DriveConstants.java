@@ -45,12 +45,10 @@ public class DriveConstants {
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
 
-    public static double MOTOR_WHEEL_RADIUS = 1.9685;
-    // for the odometry wheels
-    public static double WHEEL_RADIUS = 1.14173;
+    public static double WHEEL_RADIUS = 1.9685;
+//    public static double WHEEL_RADIUS = 1.14173;
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 1;
-    public static double TICKS_PER_DEGREE = 4;
+    public static double TRACK_WIDTH = 16;
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -58,9 +56,11 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
-    public static double kV = 1.0 / rpmToVelocity(getMaxRpm());
-    public static double kA = 0;
-    public static double kStatic = 0;
+
+    // on lounge carpet
+    public static double kV = 0.01645;
+    public static double kA = 0.00037;
+    public static double kStatic = 0.08384;
 
     /*
      * These values are used to generate the trajectories for you robot. To ensure proper operation,
@@ -71,14 +71,14 @@ public class DriveConstants {
      * forces acceleration-limited profiling).
      */
     public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
-            30.0, 30.0, 0.0,
+            10.0, 10.0, 0.0,
             Math.toRadians(180.0), Math.toRadians(180.0), 0.0
     );
 
 
     public static double encoderTicksToInches(double ticks) {
-//        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / MOTOR_CONFIG.getTicksPerRev();
-        return WHEEL_RADIUS * Math.toRadians(ticks / TICKS_PER_DEGREE);
+        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / MOTOR_CONFIG.getTicksPerRev();
+//        return WHEEL_RADIUS * ticks / 360;
     }
 
     public static double rpmToVelocity(double rpm) {
@@ -86,7 +86,7 @@ public class DriveConstants {
     }
 
     public static double getMaxRpm() {
-        return MOTOR_CONFIG.getMaxRPM() * WHEEL_RADIUS / MOTOR_WHEEL_RADIUS *
+        return MOTOR_CONFIG.getMaxRPM() *
                 (RUN_USING_ENCODER ? MOTOR_CONFIG.getAchieveableMaxRPMFraction() : 1.0);
     }
 

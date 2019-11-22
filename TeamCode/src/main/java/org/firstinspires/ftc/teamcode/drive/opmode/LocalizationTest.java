@@ -43,9 +43,8 @@ public class LocalizationTest extends LinearOpMode {
             Pose2d poseEstimate = drive.getPoseEstimate();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
-            telemetry.addData("heading", poseEstimate.getHeading());
-            telemetry.addData("externalHeading",drive.getRawExternalHeading());
-            telemetry.addData("externalHeading",drive.getRawExternalHeading());
+            telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));
+            telemetry.addData("externalHeading", Math.toDegrees(drive.getRawExternalHeading()));
             telemetry.addData("leftEncoder", leftEncoder.getCurrentPosition());
             telemetry.addData("rightEncoder", rightEncoder.getCurrentPosition());
             telemetry.addData("horizontalEncoder", horizontalEncoder.getCurrentPosition());
