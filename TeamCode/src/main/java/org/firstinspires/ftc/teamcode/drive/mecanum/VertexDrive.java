@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.teamcode.drive.localizer.TwoWheelLocalizer;
 import org.firstinspires.ftc.teamcode.drive.localizer.VertexLocalizer;
 import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
 import org.firstinspires.ftc.teamcode.util.AxesSigns;
@@ -82,6 +83,7 @@ public class VertexDrive extends SampleMecanumDriveBase {
         // TO-DO: if desired, use setLocalizer() to change the localization method
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
         setLocalizer(new VertexLocalizer(hardwareMap));
+//        setLocalizer(new TwoWheelLocalizer(hardwareMap, imu));
     }
 
     @Override
@@ -140,6 +142,6 @@ public class VertexDrive extends SampleMecanumDriveBase {
 
     @Override
     public double getRawExternalHeading() {
-        return -imu.getAngularOrientation().firstAngle;
+        return imu.getAngularOrientation().firstAngle;
     }
 }
