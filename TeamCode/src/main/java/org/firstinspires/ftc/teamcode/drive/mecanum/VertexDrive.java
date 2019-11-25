@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.teamcode.drive.localizer.TwoWheelLocalizer;
 import org.firstinspires.ftc.teamcode.drive.localizer.VertexLocalizer;
 import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
 import org.firstinspires.ftc.teamcode.util.AxesSigns;
@@ -31,7 +30,7 @@ import org.openftc.revextensions2.RevBulkData;
  * Optimized mecanum drive implementation for REV ExHs. The time savings may significantly improve
  * trajectory following performance with moderate additional complexity.
  */
-public class VertexDrive extends SampleMecanumDriveBase {
+public class VertexDrive extends BaseMecanumDrive {
     private ExpansionHubEx hub;
     private ExpansionHubMotor leftFront, leftRear, rightRear, rightFront;
     private List<ExpansionHubMotor> motors;
@@ -104,6 +103,7 @@ public class VertexDrive extends SampleMecanumDriveBase {
     @NonNull
     @Override
     public List<Double> getWheelPositions() {
+        // TODO implement this
         RevBulkData bulkData = hub.getBulkInputData();
 
         if (bulkData == null) {
@@ -117,20 +117,20 @@ public class VertexDrive extends SampleMecanumDriveBase {
         return wheelPositions;
     }
 
-    @Override
-    public List<Double> getWheelVelocities() {
-        RevBulkData bulkData = hub.getBulkInputData();
-
-        if (bulkData == null) {
-            return Arrays.asList(0.0, 0.0, 0.0, 0.0);
-        }
-
-        List<Double> wheelVelocities = new ArrayList<>();
-        for (ExpansionHubMotor motor : motors) {
-            wheelVelocities.add(encoderTicksToInches(bulkData.getMotorVelocity(motor)));
-        }
-        return wheelVelocities;
-    }
+//    @Override
+//    public List<Double> getWheelVelocities() {
+//        RevBulkData bulkData = hub.getBulkInputData();
+//
+//        if (bulkData == null) {
+//            return Arrays.asList(0.0, 0.0, 0.0, 0.0);
+//        }
+//
+//        List<Double> wheelVelocities = new ArrayList<>();
+//        for (ExpansionHubMotor motor : motors) {
+//            wheelVelocities.add(encoderTicksToInches(bulkData.getMotorVelocity(motor)));
+//        }
+//        return wheelVelocities;
+//    }
 
     @Override
     public void setMotorPowers(double v, double v1, double v2, double v3) {
