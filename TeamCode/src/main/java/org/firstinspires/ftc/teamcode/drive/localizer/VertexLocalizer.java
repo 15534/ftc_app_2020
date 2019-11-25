@@ -41,8 +41,8 @@ public class VertexLocalizer extends ThreeTrackingWheelLocalizer {
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
     public static double LATERAL_DISTANCE = 13.9; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = -2.912; // in; offset of the lateral wheel //vertical offset between the center and side wheels are -2.78
-    public static double SIDE_WHEEL_FORWARD_OFFSET = -0.371;// vertical offset of the side odemetry pods/wheels
+    public static double FORWARD_OFFSET = -3.0; // in; offset of the lateral wheel //vertical offset between the center and side wheels are -2.78
+    public static double SIDE_WHEEL_FORWARD_OFFSET = -0.312;// vertical offset of the side odemetry pods/wheels
 
     private ExpansionHubMotor leftEncoder, rightEncoder, frontEncoder;
     private ExpansionHubEx hub;
