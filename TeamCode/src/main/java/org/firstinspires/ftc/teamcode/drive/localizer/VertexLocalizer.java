@@ -10,9 +10,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Hardware;
 
 import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
+import org.openftc.revextensions2.ExpansionHubEx;
+import org.openftc.revextensions2.ExpansionHubMotor;
+import org.openftc.revextensions2.RevBulkData;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.encoderTicksToInches;
 
 /*
  * Sample tracking wheel localizer implementation assuming the standard configuration:
@@ -37,18 +43,22 @@ public class VertexLocalizer extends ThreeTrackingWheelLocalizer {
     public static double LATERAL_DISTANCE = 13.9; // in; distance between the left and right wheels
     public static double FORWARD_OFFSET = -2.78; // in; offset of the lateral wheel
 
-    private DcMotor leftEncoder, rightEncoder, frontEncoder;
+    private ExpansionHubMotor leftEncoder, rightEncoder, frontEncoder;
+    private ExpansionHubEx hub;
 
     public VertexLocalizer(HardwareMap hardwareMap) {
+
+        // TODO check if these positions are correct
+
         super(Arrays.asList(
                 new Pose2d(0, LATERAL_DISTANCE / 2, Math.toRadians(180)), // left
                 new Pose2d(0, -LATERAL_DISTANCE / 2, Math.toRadians(180)), // right
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
-        leftEncoder = hardwareMap.dcMotor.get(HardwareNames.left_encoder);
-        rightEncoder = hardwareMap.dcMotor.get(HardwareNames.right_encoder);
-        frontEncoder = hardwareMap.dcMotor.get(HardwareNames.horizontal_encoder);
+        leftEncoder = hardwareMap.get(ExpansionHubMotor.class, HardwareNames.left_encoder);
+        rightEncoder = hardwareMap.get(ExpansionHubMotor.class, HardwareNames.right_encoder);
+        frontEncoder = hardwareMap.get(ExpansionHubMotor.class, HardwareNames.horizontal_encoder);
     }
 
     public static double encoderTicksToInches(int ticks) {
@@ -58,10 +68,23 @@ public class VertexLocalizer extends ThreeTrackingWheelLocalizer {
     @NonNull
     @Override
     public List<Double> getWheelPositions() {
-        return Arrays.asList(
-                encoderTicksToInches(leftEncoder.getCurrentPosition()),
-                encoderTicksToInches(rightEncoder.getCurrentPosition()),
-                encoderTicksToInches(frontEncoder.getCurrentPosition())
-        );
+//        return Arrays.asList(
+//                encoderTicksToInches(leftEncoder.getCurrentPosition()),
+//                encoderTicksToInches(rightEncoder.getCurrentPosition()),
+//                encoderTicksToInches(frontEncoder.getCurrentPosition())
+//        );
+
+        RevBulkData bulkData = hub.getBulkInputData();
+//
+//        if (bulkData == null) {
+//            return Arrays.asList(0.0, 0.0, 0.0, 0.0);
+//        }
+
+        List<ExpansionHubMotor> encoders = Arrays.asList(leftEncoder, rightEncoder, frontEncoder);
+        List<Double> wheelPositions = new ArrayList<>();
+        for (ExpansionHubMotor motor : encoders) {
+            wheelPositions.add(encoderTicksToInches(bulkData.getMotorCurrentPosition(motor)));
+        }
+        return wheelPositions;
     }
 }
