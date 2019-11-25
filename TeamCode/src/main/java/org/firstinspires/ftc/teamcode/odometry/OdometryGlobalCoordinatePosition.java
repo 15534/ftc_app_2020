@@ -10,6 +10,9 @@ import java.io.File;
 /**
  * Created by Sarthak on 6/1/2019.
  */
+
+//left and right are shifted downwards by 0.371 inches
+//center is shifted 2.912 inch backwards shift.
 public class OdometryGlobalCoordinatePosition implements Runnable {
     //Odometry wheels
     private DcMotor verticalEncoderLeft, verticalEncoderRight, horizontalEncoder;
@@ -90,6 +93,9 @@ public class OdometryGlobalCoordinatePosition implements Runnable {
         prevNormalEncoderWheelPosition = normalEncoderWheelPosition;
     }
 
+    //left and right are shifted downwards by 0.371 inches
+    //center is shifted 2.912 inch backwards shift.
+
     /**
      * Returns the robot's global x coordinate
      * @return global x coordinate
@@ -97,7 +103,7 @@ public class OdometryGlobalCoordinatePosition implements Runnable {
     public double returnXCoordinate(){ return robotGlobalXCoordinatePosition; }
 
     /**
-     * Returns the robot's global y coordinate
+     * Returns the robot's global y coordinate  
      * @return global y coordinate
      */
     public double returnYCoordinate(){ return robotGlobalYCoordinatePosition; }
