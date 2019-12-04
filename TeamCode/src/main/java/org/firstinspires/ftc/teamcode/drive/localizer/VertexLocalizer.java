@@ -56,6 +56,8 @@ public class VertexLocalizer extends ThreeTrackingWheelLocalizer {
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
+        hub = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
+
         leftEncoder = hardwareMap.get(ExpansionHubMotor.class, HardwareNames.left_encoder);
         rightEncoder = hardwareMap.get(ExpansionHubMotor.class, HardwareNames.right_encoder);
         frontEncoder = hardwareMap.get(ExpansionHubMotor.class, HardwareNames.horizontal_encoder);
