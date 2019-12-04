@@ -47,6 +47,9 @@ public class HardwareDrivetrain
     public Servo push_servo, gripper_servo, left_v4b, right_v4b;
     public PwmControl left_v4b_pwm, right_v4b_pwm;
 
+    public DcMotor  lift_left   = null;
+    public DcMotor  lift_right  = null;
+
     /* local OpMode members. */
     HardwareMap hwMap = null;
     private ElapsedTime period  = new ElapsedTime();
@@ -77,6 +80,8 @@ public class HardwareDrivetrain
         left_v4b_pwm.setPwmRange(range);
         right_v4b_pwm.setPwmRange(range);
 
+        lift_left  = hwMap.get(DcMotor.class, HardwareNames.lift_left);
+        lift_right = hwMap.get(DcMotor.class, HardwareNames.lift_right);
 
         // drive motors
         right_front = hardwareMap.dcMotor.get(HardwareNames.right_front);
@@ -125,6 +130,12 @@ public class HardwareDrivetrain
         left_intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right_intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        // lift
+        lift_left.setDirection(DcMotor.Direction.FORWARD);
+        lift_right.setDirection(DcMotor.Direction.REVERSE);
+
+        lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
  }

@@ -19,6 +19,8 @@ public class HardwareNames {
     public static final String left_v4b = "left_v4b";
     public static final String right_v4b = "right_v4b";
 
+    public static final String lift_left = "lift_left";
+    public static final String lift_right = "lift_right";
 
     public static final double COUNTS_PER_INCH = 200.7;
 
