@@ -41,7 +41,8 @@ public class VertexLocalizer extends ThreeTrackingWheelLocalizer {
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
     public static double LATERAL_DISTANCE = 13.9; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = -2.78; // in; offset of the lateral wheel
+    public static double FORWARD_OFFSET = -3.0; // in; offset of the lateral wheel //vertical offset between the center and side wheels are -2.78
+    public static double SIDE_WHEEL_FORWARD_OFFSET = -0.312;// vertical offset of the side odemetry pods/wheels
 
     private ExpansionHubMotor leftEncoder, rightEncoder, frontEncoder;
     private ExpansionHubEx hub;
@@ -51,8 +52,8 @@ public class VertexLocalizer extends ThreeTrackingWheelLocalizer {
         // TODO check if these positions are correct
 
         super(Arrays.asList(
-                new Pose2d(0, LATERAL_DISTANCE / 2, Math.toRadians(180)), // left
-                new Pose2d(0, -LATERAL_DISTANCE / 2, Math.toRadians(180)), // right
+                new Pose2d(SIDE_WHEEL_FORWARD_OFFSET, LATERAL_DISTANCE / 2, Math.toRadians(180)), // left
+                new Pose2d(SIDE_WHEEL_FORWARD_OFFSET, -LATERAL_DISTANCE / 2, Math.toRadians(180)), // right
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
