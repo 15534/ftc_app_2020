@@ -29,6 +29,9 @@
 
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -48,11 +51,15 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="Lift Test")
-public class LiftTest extends LinearOpMode {
+@Config
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="PID Lift Test")
+public class LiftPIDTest extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareDrivetrain robot = new HardwareDrivetrain();
+    public static double k_p = 0.005;
+    public static double k_i = 0;
+    public static double k_d = 0;
 
 
     @Override
@@ -73,19 +80,32 @@ public class LiftTest extends LinearOpMode {
         robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        robot.left_v4b.setPosition(0.75);
+        robot.right_v4b.setPosition(0.75);
+
+        PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
+        PIDFController controller = new PIDFController(liftPidCoefficients);
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
+        controller.setTargetPosition(-300);
+        controller.setOutputBounds(-1, 1);
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            double lift_position = robot.lift_left.getCurrentPosition();
 
-            robot.lift_left.setPower(gamepad1.right_stick_y);
-            robot.lift_right.setPower(gamepad1.right_stick_y);
+            double correction = controller.update(lift_position);
 
-            telemetry.addData("right", robot.lift_right.getCurrentPosition());
-            telemetry.addData("left", robot.lift_left.getCurrentPosition());
+            robot.lift_left.setPower(correction);
+            robot.lift_right.setPower(correction);
 
-            telemetry.addData("power", gamepad1.right_stick_y);
+//            telemetry.addData("right", robot.lift_right.getCurrentPosition());
+            telemetry.addData("position", lift_position);
+            telemetry.addData("correction", correction);
+
+//            telemetry.addData("power", gamepad1.right_stick_y);
             telemetry.update();
         }
     }

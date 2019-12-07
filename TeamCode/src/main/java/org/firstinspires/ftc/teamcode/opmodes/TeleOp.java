@@ -29,13 +29,20 @@
 
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
 import org.firstinspires.ftc.teamcode.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
+
+import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_i;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
@@ -64,6 +71,8 @@ public class TeleOp extends LinearOpMode {
     private double speedAdjust = 0;
 
     private double leftBackSpeed, rightBackSpeed, leftFrontSpeed, rightFrontSpeed, intakeSpeed;
+    private double desiredLiftPosition = 0;
+    private double manualLiftPower = 0;
     private OdometryGlobalCoordinatePosition globalPositionUpdate;
 
     private int drivetrainSpeedAdjust = 5;
@@ -82,6 +91,9 @@ public class TeleOp extends LinearOpMode {
     ElapsedTime drop_routine_time = null;
     ElapsedTime gf_drop_routine_time = null;
 
+    static PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
+    PIDFController controller = new PIDFController(liftPidCoefficients);
+
     private String mode = "MODE_TANK";
     private boolean stickControllingPusher = false;
 
@@ -93,8 +105,15 @@ public class TeleOp extends LinearOpMode {
          */
         robot.init(hardwareMap);
 
+        // reset lift encoders
+        robot.lift_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.lift_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         // Send telemetry message to signify robot waiting;
-        telemetry.addData("Say", "Hello Driver");    //
+        telemetry.addLine("Ready");
         telemetry.update();
 
         globalPositionUpdate = new OdometryGlobalCoordinatePosition(robot.verticalLeft, robot.verticalRight,
@@ -107,6 +126,10 @@ public class TeleOp extends LinearOpMode {
         robot.right_v4b.setPosition(0.6);
         robot.push_servo.setPosition(0.35);
         robot.gripper_servo.setPosition(1);
+
+        // lift PID controller
+        controller.setTargetPosition(0);
+        controller.setOutputBounds(-1, 1);
 
 
         // Wait for the game to start (driver presses PLAY)
@@ -292,8 +315,17 @@ public class TeleOp extends LinearOpMode {
 
             // gamepad 2
 
+            // manually adjust lift
+            if (gamepad2.left_bumper) {
+                manualLiftPower = 0.3;
+            } else if (gamepad2.right_bumper) {
+                manualLiftPower = -0.3;
+            } else {
+                manualLiftPower = 0;
+            }
+
             // go to stacking position routine
-            if (stack_routine_time == null && gamepad2.dpad_up) {
+            if (stack_routine_time == null && gamepad2.dpad_right) {
                 stack_routine_time = new ElapsedTime();
             }
             if (stack_routine_time != null) {
@@ -307,71 +339,70 @@ public class TeleOp extends LinearOpMode {
                     robot.right_v4b.setPosition(0.75);
                 } else if (stack_routine_time.milliseconds() < 2300) {
                     robot.gripper_servo.setPosition(0.6);
-                } else if (stack_routine_time.milliseconds() < 3000) {
-                    robot.left_v4b.setPosition(0.22);
-                    robot.right_v4b.setPosition(0.22);
-                } else {
+                    intakeSpeed = 0;
+                    lastIntakeButton = "stop";
+                }  else {
                     stack_routine_time = null;
                 }
             }
 
-            // drop routine routine
+//            // drop routine routine
+//
+//            if (drop_routine_time == null && gamepad2.dpad_down) {
+//                drop_routine_time = new ElapsedTime();
+//            }
+//            if (drop_routine_time != null) {
+//                if (drop_routine_time.milliseconds() < 500) {
+//                    robot.gripper_servo.setPosition(1);
+//                } else if (drop_routine_time.milliseconds() < 1000) {
+//                    robot.left_v4b.setPosition(0.5);
+//                    robot.right_v4b.setPosition(0.5);
+//                } else if (drop_routine_time.milliseconds() < 1500) {
+//                    robot.push_servo.setPosition(0.3);
+//                } else if (drop_routine_time.milliseconds() < 2000) {
+//                    robot.left_v4b.setPosition(0.6);
+//                    robot.right_v4b.setPosition(0.6);
+//                    intakeSpeed = 0.6;
+//                    lastIntakeButton = "on";
+//                } else {
+//                    drop_routine_time = null;
+//                }
+//            }
 
-            if (drop_routine_time == null && gamepad2.dpad_down) {
-                drop_routine_time = new ElapsedTime();
-            }
-            if (drop_routine_time != null) {
-                if (drop_routine_time.milliseconds() < 500) {
-                    robot.gripper_servo.setPosition(1);
-                } else if (drop_routine_time.milliseconds() < 1000) {
-                    robot.left_v4b.setPosition(0.5);
-                    robot.right_v4b.setPosition(0.5);
-                } else if (drop_routine_time.milliseconds() < 1500) {
-                    robot.push_servo.setPosition(0.3);
-                } else if (drop_routine_time.milliseconds() < 2000) {
-                    robot.left_v4b.setPosition(0.6);
-                    robot.right_v4b.setPosition(0.6);
-                    intakeSpeed = 0.6;
-                    lastIntakeButton = "on";
-                } else {
-                    drop_routine_time = null;
-                }
-            }
-
-            // gf drop routine
-            if (gf_drop_routine_time == null && gamepad2.dpad_right) {
-                gf_drop_routine_time = new ElapsedTime();
-            }
-            if (gf_drop_routine_time != null) {
-                if (gf_drop_routine_time.milliseconds() < 300) {
-                    robot.push_servo.setPosition(0.35);
-                    robot.gripper_servo.setPosition(1);
-                } else if (gf_drop_routine_time.milliseconds() < 600) {
-                    robot.push_servo.setPosition(1);
-                } else if (gf_drop_routine_time.milliseconds() < 900) {
-                    robot.left_v4b.setPosition(0.75);
-                    robot.right_v4b.setPosition(0.75);
-                } else if (gf_drop_routine_time.milliseconds() < 1200) {
-                    robot.gripper_servo.setPosition(0.6);
-                } else if (gf_drop_routine_time.milliseconds() < 1500) {
-                    robot.left_v4b.setPosition(0);
-                    robot.right_v4b.setPosition(0);
-                } else if (gf_drop_routine_time.milliseconds() < 1800) {
-                    robot.gripper_servo.setPosition(1);
-                } else if (gf_drop_routine_time.milliseconds() < 2100) {
-                    robot.left_v4b.setPosition(0.5);
-                    robot.right_v4b.setPosition(0.5);
-                } else if (gf_drop_routine_time.milliseconds() < 3000) {
-                    robot.push_servo.setPosition(0.3);
-                } else if (gf_drop_routine_time.milliseconds() < 3500) {
-                    robot.left_v4b.setPosition(0.6);
-                    robot.right_v4b.setPosition(0.6);
-                    intakeSpeed = 0.6;
-                    lastIntakeButton = "a";
-                } else {
-                    gf_drop_routine_time = null;
-                }
-            }
+//            // gf drop routine
+//            if (gf_drop_routine_time == null && gamepad2.dpad_right) {
+//                gf_drop_routine_time = new ElapsedTime();
+//            }
+//            if (gf_drop_routine_time != null) {
+//                if (gf_drop_routine_time.milliseconds() < 300) {
+//                    robot.push_servo.setPosition(0.35);
+//                    robot.gripper_servo.setPosition(1);
+//                } else if (gf_drop_routine_time.milliseconds() < 600) {
+//                    robot.push_servo.setPosition(1);
+//                } else if (gf_drop_routine_time.milliseconds() < 900) {
+//                    robot.left_v4b.setPosition(0.75);
+//                    robot.right_v4b.setPosition(0.75);
+//                } else if (gf_drop_routine_time.milliseconds() < 1200) {
+//                    robot.gripper_servo.setPosition(0.6);
+//                } else if (gf_drop_routine_time.milliseconds() < 1500) {
+//                    robot.left_v4b.setPosition(0);
+//                    robot.right_v4b.setPosition(0);
+//                } else if (gf_drop_routine_time.milliseconds() < 1800) {
+//                    robot.gripper_servo.setPosition(1);
+//                } else if (gf_drop_routine_time.milliseconds() < 2100) {
+//                    robot.left_v4b.setPosition(0.5);
+//                    robot.right_v4b.setPosition(0.5);
+//                } else if (gf_drop_routine_time.milliseconds() < 3000) {
+//                    robot.push_servo.setPosition(0.3);
+//                } else if (gf_drop_routine_time.milliseconds() < 3500) {
+//                    robot.left_v4b.setPosition(0.6);
+//                    robot.right_v4b.setPosition(0.6);
+//                    intakeSpeed = 0.6;
+//                    lastIntakeButton = "a";
+//                } else {
+//                    gf_drop_routine_time = null;
+//                }
+//            }
 
             // left joystick - control pusher
             if (gamepad2.left_stick_y > 0.1) {
@@ -392,11 +423,24 @@ public class TeleOp extends LinearOpMode {
             robot.right_intake.setPower(intakeSpeed);
             robot.left_intake.setPower(intakeSpeed);
 
+            double lift_position = robot.lift_left.getCurrentPosition();
+
+            if (manualLiftPower == 0) {
+                // use PID to hold position
+                double correction = controller.update(lift_position);
+
+                robot.lift_left.setPower(correction);
+                robot.lift_right.setPower(correction);
+            } else {
+                robot.lift_left.setPower(manualLiftPower);
+                robot.lift_right.setPower(manualLiftPower);
+                controller.setTargetPosition(lift_position);
+            }
+
             // update telemetry
 //            telemetry.addData("leftBack", leftBackSpeed);
 //            telemetry.addData("rightBack", rightBackSpeed);
 //            telemetry.addData("leftFront", leftFrontSpeed);
-//            telemetry.addData("rightFront", rightFrontSpeed);
             telemetry.update();
         }
     }

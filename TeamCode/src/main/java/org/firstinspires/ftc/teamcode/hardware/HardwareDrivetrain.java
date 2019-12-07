@@ -80,8 +80,8 @@ public class HardwareDrivetrain
         left_v4b_pwm.setPwmRange(range);
         right_v4b_pwm.setPwmRange(range);
 
-        lift_left  = hwMap.get(DcMotor.class, HardwareNames.lift_left);
-        lift_right = hwMap.get(DcMotor.class, HardwareNames.lift_right);
+        lift_left  = hardwareMap.get(DcMotor.class, HardwareNames.lift_left);
+        lift_right = hardwareMap.get(DcMotor.class, HardwareNames.lift_right);
 
         // drive motors
         right_front = hardwareMap.dcMotor.get(HardwareNames.right_front);
@@ -134,9 +134,11 @@ public class HardwareDrivetrain
         lift_left.setDirection(DcMotor.Direction.FORWARD);
         lift_right.setDirection(DcMotor.Direction.REVERSE);
 
-        lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        lift_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
  }
 
