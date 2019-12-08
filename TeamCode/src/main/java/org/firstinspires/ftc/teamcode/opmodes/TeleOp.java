@@ -1,32 +1,3 @@
-/* Copyright (c) 2017 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
@@ -43,6 +14,7 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_i;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_G;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
@@ -71,7 +43,7 @@ public class TeleOp extends LinearOpMode {
     private double speedAdjust = 0;
 
     private double leftBackSpeed, rightBackSpeed, leftFrontSpeed, rightFrontSpeed, intakeSpeed;
-    private double desiredLiftPosition = 0;
+    private int desiredLiftPosition = 0;
     private double manualLiftPower = 0;
     private OdometryGlobalCoordinatePosition globalPositionUpdate;
 
@@ -89,13 +61,15 @@ public class TeleOp extends LinearOpMode {
 
     ElapsedTime stack_routine_time = null;
     ElapsedTime drop_routine_time = null;
-    ElapsedTime gf_drop_routine_time = null;
+    ElapsedTime lift_routine_time = null;
 
     static PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
-    PIDFController controller = new PIDFController(liftPidCoefficients);
+    PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
+            0, x -> k_G);
 
     private String mode = "MODE_TANK";
     private boolean stickControllingPusher = false;
+    private boolean gamepad2XYPressed = false;
 
     @Override
     public void runOpMode() {
@@ -298,11 +272,11 @@ public class TeleOp extends LinearOpMode {
                 // outtake
                 intakeSpeed = -0.3;
                 lastIntakeButton = "temp";
-            } else if (gamepad2.y) {
+            } else if (false) {
                 // intake fast
                 intakeSpeed = 1;
                 lastIntakeButton = "temp";
-            } else if (gamepad1.x || gamepad2.x || lastIntakeButton.equals("temp")) {
+            } else if (gamepad1.x || lastIntakeButton.equals("temp")) {
                 // stop intake
                 intakeSpeed = 0;
                 lastIntakeButton = "stop";
@@ -324,6 +298,22 @@ public class TeleOp extends LinearOpMode {
                 manualLiftPower = 0;
             }
 
+            // set desired position (x to decrease position, y to increase)
+            if (gamepad2.y) {
+                if (!gamepad2XYPressed) {
+                    desiredLiftPosition++;
+                }
+                gamepad2XYPressed = true;
+            } else if (gamepad2.x) {
+                if (!gamepad2XYPressed) {
+                    desiredLiftPosition = Math.max(0, desiredLiftPosition - 1);
+                }
+                gamepad2XYPressed = true;
+            } else {
+                gamepad2XYPressed = false;
+            }
+
+
             // go to stacking position routine
             if (stack_routine_time == null && gamepad2.dpad_right) {
                 stack_routine_time = new ElapsedTime();
@@ -343,6 +333,52 @@ public class TeleOp extends LinearOpMode {
                     lastIntakeButton = "stop";
                 }  else {
                     stack_routine_time = null;
+                }
+            }
+
+            // lift + flip routine
+            if (lift_routine_time == null && gamepad2.dpad_up) {
+                lift_routine_time = new ElapsedTime();
+            }
+            if (lift_routine_time != null) {
+                if (lift_routine_time.milliseconds() < 500) {
+                    // get pusher out of the way
+                    robot.push_servo.setPosition(0.35);
+                } else if (lift_routine_time.milliseconds() < 3000){
+                    controller.setTargetPosition(-50 + -155 * desiredLiftPosition);
+                } else if (lift_routine_time.milliseconds() < 4000) {
+                    robot.left_v4b.setPosition(0);
+                    robot.right_v4b.setPosition(0);
+                } else {
+                    desiredLiftPosition++;
+                    lift_routine_time = null;
+                }
+            }
+
+            // drop routine
+            if (drop_routine_time == null && gamepad2.dpad_down) {
+                drop_routine_time = new ElapsedTime();
+            }
+            if (drop_routine_time != null) {
+                if (drop_routine_time.milliseconds() < 500) {
+                    // release the gripper
+                    robot.gripper_servo.setPosition(1);
+                } else if (drop_routine_time.milliseconds() < 1000) {
+                    // raise the lift
+                    controller.setTargetPosition(-20 + robot.lift_left.getCurrentPosition());
+                } else if (drop_routine_time.milliseconds() < 1500) {
+                    // reset v4b's to grab position
+                    robot.left_v4b.setPosition(0.75);
+                    robot.right_v4b.setPosition(0.75);
+                } else if (drop_routine_time.milliseconds() < 2000) {
+                    // lower the lift
+                    controller.setTargetPosition(0);
+                } else if (drop_routine_time.milliseconds() < 2500) {
+                    // reset v4b's to wait position
+                    robot.left_v4b.setPosition(0.6);
+                    robot.right_v4b.setPosition(0.6);
+                } else {
+                    drop_routine_time = null;
                 }
             }
 
@@ -441,6 +477,7 @@ public class TeleOp extends LinearOpMode {
 //            telemetry.addData("leftBack", leftBackSpeed);
 //            telemetry.addData("rightBack", rightBackSpeed);
 //            telemetry.addData("leftFront", leftFrontSpeed);
+            telemetry.addData("desiredLiftPosition", desiredLiftPosition);
             telemetry.update();
         }
     }

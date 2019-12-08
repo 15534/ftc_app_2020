@@ -60,6 +60,8 @@ public class LiftPIDTest extends LinearOpMode {
     public static double k_p = 0.005;
     public static double k_i = 0;
     public static double k_d = 0;
+    public static double k_G = -0.001;
+    public static double target = -800;
 
 
     @Override
@@ -84,12 +86,13 @@ public class LiftPIDTest extends LinearOpMode {
         robot.right_v4b.setPosition(0.75);
 
         PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
-        PIDFController controller = new PIDFController(liftPidCoefficients);
+        PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
+                0, x -> k_G);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        controller.setTargetPosition(-300);
+        controller.setTargetPosition(target);
         controller.setOutputBounds(-1, 1);
 
         // run until the end of the match (driver presses STOP)
