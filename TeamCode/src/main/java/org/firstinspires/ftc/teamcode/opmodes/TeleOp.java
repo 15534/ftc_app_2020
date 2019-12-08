@@ -62,6 +62,7 @@ public class TeleOp extends LinearOpMode {
     ElapsedTime stack_routine_time = null;
     ElapsedTime drop_routine_time = null;
     ElapsedTime lift_routine_time = null;
+    private double target = 0;
 
     static PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
     PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
@@ -290,10 +291,12 @@ public class TeleOp extends LinearOpMode {
             // gamepad 2
 
             // manually adjust lift
+            // TODO change to modify a target position rather than directly set powers
+            // TODO except when the position is close to 0, then automatically flush with the robot
             if (gamepad2.left_bumper) {
-                manualLiftPower = 0.3;
+                manualLiftPower = 0.2;
             } else if (gamepad2.right_bumper) {
-                manualLiftPower = -0.3;
+                manualLiftPower = -0.2;
             } else {
                 manualLiftPower = 0;
             }
@@ -344,12 +347,16 @@ public class TeleOp extends LinearOpMode {
                 if (lift_routine_time.milliseconds() < 500) {
                     // get pusher out of the way
                     robot.push_servo.setPosition(0.35);
-                } else if (lift_routine_time.milliseconds() < 3000){
-                    controller.setTargetPosition(-50 + -155 * desiredLiftPosition);
-                } else if (lift_routine_time.milliseconds() < 4000) {
+                } else if (lift_routine_time.milliseconds() < 600){
+                    target = -50 + -155 * desiredLiftPosition;
+                    controller.setTargetPosition(target);
+                } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) > 5) {
+                    // we're still far away from the target
+                    // do nothing
+                } else {
+                    // extend v4b servos to drop position
                     robot.left_v4b.setPosition(0);
                     robot.right_v4b.setPosition(0);
-                } else {
                     desiredLiftPosition++;
                     lift_routine_time = null;
                 }
@@ -360,20 +367,20 @@ public class TeleOp extends LinearOpMode {
                 drop_routine_time = new ElapsedTime();
             }
             if (drop_routine_time != null) {
-                if (drop_routine_time.milliseconds() < 500) {
+                if (drop_routine_time.milliseconds() < 400) {
                     // release the gripper
                     robot.gripper_servo.setPosition(1);
-                } else if (drop_routine_time.milliseconds() < 1000) {
+                } else if (drop_routine_time.milliseconds() < 800) {
                     // raise the lift
                     controller.setTargetPosition(-20 + robot.lift_left.getCurrentPosition());
-                } else if (drop_routine_time.milliseconds() < 1500) {
+                } else if (drop_routine_time.milliseconds() < 1200) {
                     // reset v4b's to grab position
                     robot.left_v4b.setPosition(0.75);
                     robot.right_v4b.setPosition(0.75);
-                } else if (drop_routine_time.milliseconds() < 2000) {
+                } else if (drop_routine_time.milliseconds() < 1600) {
                     // lower the lift
                     controller.setTargetPosition(0);
-                } else if (drop_routine_time.milliseconds() < 2500) {
+                } else if (drop_routine_time.milliseconds() < 2000) {
                     // reset v4b's to wait position
                     robot.left_v4b.setPosition(0.6);
                     robot.right_v4b.setPosition(0.6);
@@ -477,6 +484,9 @@ public class TeleOp extends LinearOpMode {
 //            telemetry.addData("leftBack", leftBackSpeed);
 //            telemetry.addData("rightBack", rightBackSpeed);
 //            telemetry.addData("leftFront", leftFrontSpeed);
+            telemetry.addData("current", robot.lift_left.getCurrentPosition());
+            telemetry.addData("desired", (target));
+            telemetry.addData("error", (Math.abs(robot.lift_left.getCurrentPosition() - target) < 5));
             telemetry.addData("desiredLiftPosition", desiredLiftPosition);
             telemetry.update();
         }

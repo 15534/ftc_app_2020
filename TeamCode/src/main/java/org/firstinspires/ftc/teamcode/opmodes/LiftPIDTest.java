@@ -57,10 +57,10 @@ public class LiftPIDTest extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareDrivetrain robot = new HardwareDrivetrain();
-    public static double k_p = 0.005;
+    public static double k_p = 0.003;
     public static double k_i = 0;
     public static double k_d = 0;
-    public static double k_G = -0.001;
+    public static double k_G = -0.005;
     public static double target = -800;
 
 
