@@ -480,6 +480,15 @@ public class TeleOp extends LinearOpMode {
                 controller.setTargetPosition(lift_position);
             }
 
+
+            robot.foundation_left.setPosition(gamepad2.right_stick_y);
+            robot.foundation_right.setPosition(gamepad2.right_stick_y);
+            if(gamepad2.right_stick_button) {
+                robot.foundation_left.setPosition(0);
+                robot.foundation_right.setPosition(0);
+                sleep(400);
+            }
+
             // update telemetry
 //            telemetry.addData("leftBack", leftBackSpeed);
 //            telemetry.addData("rightBack", rightBackSpeed);

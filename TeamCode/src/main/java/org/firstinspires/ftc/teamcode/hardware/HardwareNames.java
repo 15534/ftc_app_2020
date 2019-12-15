@@ -21,6 +21,8 @@ public class HardwareNames {
 
     public static final String lift_left = "lift_left";
     public static final String lift_right = "lift_right";
+    public static final String foundation_left = "foundation_left";
+    public static final String foundation_right = "foundation_right";
 
     public static final double COUNTS_PER_INCH = 200.7;
 
