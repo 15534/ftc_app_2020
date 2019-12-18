@@ -59,9 +59,13 @@ public class TeleOp extends LinearOpMode {
 
     private String lastIntakeButton = "x";
 
-    ElapsedTime stack_routine_time = null;
-    ElapsedTime drop_routine_time = null;
-    ElapsedTime lift_routine_time = null;
+    private ElapsedTime stack_routine_time = null;
+    private ElapsedTime drop_routine_time = null;
+    private ElapsedTime drop_routine_2_time = null;
+    private ElapsedTime lift_routine_time = null;
+    private ElapsedTime foundation_gripper_routine_time = null;
+    private ElapsedTime last_time = null;
+    private double foundationGripperSpeed = 0;
     private double target = 0;
 
     static PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
@@ -69,6 +73,7 @@ public class TeleOp extends LinearOpMode {
             0, x -> k_G);
 
     private String mode = "MODE_TANK";
+    private boolean gripperIsDown = false;
     private boolean stickControllingPusher = false;
     private boolean gamepad2XYPressed = false;
 
@@ -106,6 +111,8 @@ public class TeleOp extends LinearOpMode {
         controller.setTargetPosition(0);
         controller.setOutputBounds(-1, 1);
 
+        // extra vars
+        boolean goneUp = false;
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -294,11 +301,9 @@ public class TeleOp extends LinearOpMode {
             // TODO change to modify a target position rather than directly set powers
             // TODO except when the position is close to 0, then automatically flush with the robot
             if (gamepad2.left_bumper) {
-                manualLiftPower = 0.2;
+                target += 5;
             } else if (gamepad2.right_bumper) {
-                manualLiftPower = -0.2;
-            } else {
-                manualLiftPower = 0;
+                target -= 5;
             }
 
             // set desired position (x to decrease position, y to increase)
@@ -342,22 +347,35 @@ public class TeleOp extends LinearOpMode {
             // lift + flip routine
             if (lift_routine_time == null && gamepad2.dpad_up) {
                 lift_routine_time = new ElapsedTime();
+                drop_routine_2_time = null;
             }
             if (lift_routine_time != null) {
                 if (lift_routine_time.milliseconds() < 500) {
                     // get pusher out of the way
                     robot.push_servo.setPosition(0.35);
                 } else if (lift_routine_time.milliseconds() < 600){
-                    target = -50 + -155 * desiredLiftPosition;
-                    controller.setTargetPosition(target);
+                    if (desiredLiftPosition < 8) {
+                        target = -50 + -127 * desiredLiftPosition;
+                    } else {
+                        // capstone (go less high)
+                        target = -940;
+                    }
                 } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) > 5) {
                     // we're still far away from the target
                     // do nothing
                 } else {
                     // extend v4b servos to drop position
-                    robot.left_v4b.setPosition(0);
-                    robot.right_v4b.setPosition(0);
-                    desiredLiftPosition++;
+                    if (desiredLiftPosition < 8) {
+                        robot.left_v4b.setPosition(0);
+                        robot.right_v4b.setPosition(0);
+                    } else {
+                        // capstone level
+                        robot.left_v4b.setPosition(0.15);
+                        robot.right_v4b.setPosition(0.15);
+                    }
+                    if (desiredLiftPosition < 8) {
+                        desiredLiftPosition++;
+                    }
                     lift_routine_time = null;
                 }
             }
@@ -370,22 +388,44 @@ public class TeleOp extends LinearOpMode {
                 if (drop_routine_time.milliseconds() < 400) {
                     // release the gripper
                     robot.gripper_servo.setPosition(1);
-                } else if (drop_routine_time.milliseconds() < 800) {
-                    // raise the lift
-                    controller.setTargetPosition(-20 + robot.lift_left.getCurrentPosition());
-                } else if (drop_routine_time.milliseconds() < 1200) {
+                    goneUp = false;
+                } else if (drop_routine_time.milliseconds() < 500) {
+                    if (!goneUp) {
+                        if (desiredLiftPosition < 8) {
+                            target = target - 50;
+                        } else {
+                            target = -1005;
+                        }
+                        goneUp = true;
+                    }
+                } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) > 5) {
+                    // we're still far away from the target
+                    // do nothing
+                } else {
+                    // start new routine timer
+                    drop_routine_2_time = new ElapsedTime();
+                    drop_routine_time = null;
+                }
+            }
+
+            // second part of drop routine
+            if (drop_routine_2_time != null) {
+                if (drop_routine_2_time.milliseconds() < 400) {
                     // reset v4b's to grab position
                     robot.left_v4b.setPosition(0.75);
                     robot.right_v4b.setPosition(0.75);
-                } else if (drop_routine_time.milliseconds() < 1600) {
+                    telemetry.addLine("grab position");
+                } else if (drop_routine_2_time.milliseconds() < 800) {
                     // lower the lift
-                    controller.setTargetPosition(0);
-                } else if (drop_routine_time.milliseconds() < 2000) {
+                    target = 0;
+                    telemetry.addLine("lower lift");
+                } else if (drop_routine_2_time.milliseconds() < 1600) {
+                    telemetry.addLine("wait position");
                     // reset v4b's to wait position
                     robot.left_v4b.setPosition(0.6);
                     robot.right_v4b.setPosition(0.6);
                 } else {
-                    drop_routine_time = null;
+                    drop_routine_2_time = null;
                 }
             }
 
@@ -457,6 +497,63 @@ public class TeleOp extends LinearOpMode {
                 robot.push_servo.setPosition(pusherPosition);
             }
 
+
+            double lift_position = robot.lift_left.getCurrentPosition();
+
+            if (target > 0) {
+                robot.lift_left.setPower(1);
+                robot.lift_right.setPower(1);
+                sleep(200);
+                target = 0;
+            }
+
+            if (target < 10 && target > 3) {
+                // go all the way down
+                robot.lift_left.setPower(1);
+                robot.lift_right.setPower(1);
+            }
+
+//            if (manualLiftPower == 0) {
+
+            // set controller to follow target
+            controller.setTargetPosition(target);
+
+            // use PID to hold position
+            double correction = controller.update(lift_position);
+
+            robot.lift_left.setPower(correction);
+            robot.lift_right.setPower(correction);
+
+//            } else {
+//                robot.lift_left.setPower(manualLiftPower);
+//                robot.lift_right.setPower(manualLiftPower);
+//                target = lift_position;
+//            }
+
+
+            // control foundation grippers
+            if (foundation_gripper_routine_time != null) {
+                telemetry.addLine("field gripper routine");
+                // lift foundation grippers for 400ms
+                if (foundation_gripper_routine_time.milliseconds() < 400) {
+                    // up
+                    foundationGripperSpeed = 1;
+                } else {
+                    // stop the routine
+                    foundationGripperSpeed = 0;
+                    gripperIsDown = false;
+                    foundation_gripper_routine_time = null;
+                }
+            }
+
+            // foundation gripper
+            foundationGripperSpeed = gamepad2.right_stick_y;
+
+
+            // set foundation gripper powers
+            robot.foundation_left.setPower(foundationGripperSpeed);
+            robot.foundation_right.setPower(foundationGripperSpeed);
+
             // set motor powers
             robot.left_back.setPower(leftBackSpeed);
             robot.left_front.setPower(leftFrontSpeed);
@@ -466,39 +563,15 @@ public class TeleOp extends LinearOpMode {
             robot.right_intake.setPower(intakeSpeed);
             robot.left_intake.setPower(intakeSpeed);
 
-            double lift_position = robot.lift_left.getCurrentPosition();
-
-            if (manualLiftPower == 0) {
-                // use PID to hold position
-                double correction = controller.update(lift_position);
-
-                robot.lift_left.setPower(correction);
-                robot.lift_right.setPower(correction);
-            } else {
-                robot.lift_left.setPower(manualLiftPower);
-                robot.lift_right.setPower(manualLiftPower);
-                controller.setTargetPosition(lift_position);
-            }
-
-
-            robot.foundation_left.setPosition(gamepad2.right_stick_y);
-            robot.foundation_right.setPosition(gamepad2.right_stick_y);
-            if(gamepad2.right_stick_button) {
-                robot.foundation_left.setPosition(0);
-                robot.foundation_right.setPosition(0);
-                sleep(400);
-            }
-
             // update telemetry
-//            telemetry.addData("leftBack", leftBackSpeed);
-//            telemetry.addData("rightBack", rightBackSpeed);
-//            telemetry.addData("leftFront", leftFrontSpeed);
             telemetry.addData("current", robot.lift_left.getCurrentPosition());
-            telemetry.addData("desired", (target));
-            telemetry.addData("error", (Math.abs(robot.lift_left.getCurrentPosition() - target) < 5));
+            telemetry.addData("target", target);
             telemetry.addData("desiredLiftPosition", desiredLiftPosition);
             telemetry.update();
         }
+
+        robot.foundation_left.setPower(0);
+        robot.foundation_right.setPower(0);
     }
 
     /**

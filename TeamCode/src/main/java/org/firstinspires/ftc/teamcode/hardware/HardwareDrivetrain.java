@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -44,7 +45,8 @@ public class HardwareDrivetrain
     public DcMotor verticalLeft, verticalRight, horizontal;
     public DcMotor left_intake, right_intake;
 
-    public Servo push_servo, gripper_servo, left_v4b, right_v4b, foundation_left, foundation_right;
+    public Servo push_servo, gripper_servo, left_v4b, right_v4b;
+    public CRServo foundation_left, foundation_right;
     public PwmControl left_v4b_pwm, right_v4b_pwm;
 
     public DcMotor  lift_left   = null;
@@ -65,10 +67,10 @@ public class HardwareDrivetrain
         push_servo = hardwareMap.servo.get(HardwareNames.push_servo);
         gripper_servo = hardwareMap.servo.get(HardwareNames.gripper_servo);
 
-        foundation_left = hardwareMap.servo.get(HardwareNames.foundation_left);
-        foundation_right = hardwareMap.servo.get(HardwareNames.foundation_right);
-        foundation_right.setDirection(Servo.Direction.FORWARD);
-        foundation_left.setDirection(Servo.Direction.REVERSE);
+        foundation_left = hardwareMap.crservo.get(HardwareNames.foundation_left);
+        foundation_right = hardwareMap.crservo.get(HardwareNames.foundation_right);
+        foundation_right.setDirection(CRServo.Direction.FORWARD);
+        foundation_left.setDirection(CRServo.Direction.REVERSE);
 
         left_v4b = hardwareMap.servo.get(HardwareNames.left_v4b);
         right_v4b = hardwareMap.servo.get(HardwareNames.right_v4b);
