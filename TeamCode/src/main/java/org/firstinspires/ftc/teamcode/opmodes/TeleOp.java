@@ -74,9 +74,10 @@ public class TeleOp extends LinearOpMode {
     PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
             0, x -> k_G);
 
-    private String mode = "MODE_TANK";
     private boolean gripperIsDown = false;
     private boolean stickControllingPusher = false;
+    private boolean leftTriggerPressed;
+    private boolean rightTriggerPressed = false;
     private boolean gamepad2XYPressed = false;
 
     @Override
@@ -122,41 +123,38 @@ public class TeleOp extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            // mode switch
-            if (!start_button_pressed && gamepad1.start) {
-                start_button_pressed = true;
-                if (mode.equals("MODE_FCD")) {
-                    mode = "MODE_TANK";
-                } else if (mode.equals("MODE_TANK")) {
-                    mode = "MODE_FCD";
-                }
-            }
-            if (!gamepad1.start) start_button_pressed = false;
-
             // initialize all speeds to 0
             leftBackSpeed = leftFrontSpeed = rightBackSpeed = rightFrontSpeed = 0;
 
             // speed adjust
             // decrease speed
             if (gamepad1.left_trigger > 0.2) {
-                drivetrainSpeedAdjust = 3;
+                // change on new click
+                if (!leftTriggerPressed) {
+                    if (drivetrainSpeedAdjust != 2) {
+                        drivetrainSpeedAdjust = 2;
+                    } else {
+                        drivetrainSpeedAdjust = 5;
+                    }
+                }
+                leftTriggerPressed = true;
             } else {
-                drivetrainSpeedAdjust = 5;
+                leftTriggerPressed = false;
             }
-//
-//            // increase speed
-//            if (gamepad1.right_trigger > 0.3) {
-//                if (right_trigger_time == null) {
-//                    right_trigger_time = new ElapsedTime();
-//                } else if (right_trigger_time.milliseconds() > 500) {
-//                    drivetrainSpeedAdjust = 5;
-//                }
-//            } else {
-//                if (right_trigger_time != null) {
-//                    drivetrainSpeedAdjust = Math.min(5, drivetrainSpeedAdjust + 1);
-//                    right_trigger_time = null;
-//                }
-//            }
+
+            if (gamepad1.right_trigger > 0.2) {
+                // change on new click
+                if (!rightTriggerPressed) {
+                    if (drivetrainSpeedAdjust != 3) {
+                        drivetrainSpeedAdjust = 3;
+                    } else {
+                        drivetrainSpeedAdjust = 5;
+                    }
+                }
+                rightTriggerPressed = true;
+            } else {
+                rightTriggerPressed = false;
+            }
 
             telemetry.addData("speed", drivetrainSpeedAdjust * 20);
 
@@ -182,75 +180,27 @@ public class TeleOp extends LinearOpMode {
                 bumper_rotate_accel.reset();
             }
 
+            // tank driving
 
-            if (mode.equals("MODE_FCD")) {
-                // field centric driving (right joystick)
-                if (Math.abs(gamepad1.right_stick_y) > THRESHOLD || Math.abs(gamepad1.right_stick_x) > THRESHOLD) {
-                    speedAdjust = Math.min(1, accel.milliseconds() / millisecondsToFullSpeed);
+            // left - left joystick
+            // right - right joystick
+            leftFrontSpeed = leftBackSpeed = -drivetrainSpeedAdjust * gamepad1.left_stick_y / 5;
+            rightFrontSpeed = rightBackSpeed = -drivetrainSpeedAdjust * gamepad1.right_stick_y / 5;
 
-                    double[] maxSpeeds = getMaxSpeeds(gamepad1.right_stick_x, gamepad1.right_stick_y,
-                            globalPositionUpdate.returnOrientation());
+            // strafe
+            if (gamepad1.left_bumper || gamepad1.right_bumper) {
+                double strafeSpeed = drivetrainSpeedAdjust / 5.0;
 
-                    rightFrontSpeed = speedAdjust * maxSpeeds[0];
-                    leftFrontSpeed  = speedAdjust * maxSpeeds[1];
-                    rightBackSpeed  = speedAdjust * maxSpeeds[2];
-                    leftBackSpeed   = speedAdjust * maxSpeeds[3];
-
-                } else {
-                    accel.reset();
+                if (gamepad1.left_bumper) {  // strafe left
+                    leftFrontSpeed = rightBackSpeed = -strafeSpeed;
+                    leftBackSpeed = rightFrontSpeed = strafeSpeed;
+                } else {  // strafe right
+                    leftFrontSpeed = rightBackSpeed = strafeSpeed;
+                    leftBackSpeed = rightFrontSpeed = -strafeSpeed;
                 }
 
-                // rotating (left joystick)
-                if (Math.abs(gamepad1.left_stick_x) > THRESHOLD) {
-                    double rotationSpeed = Math.min(Math.abs(FCD_ROTATION_SPEED * gamepad1.left_stick_x),
-                            rotate_accel.milliseconds() / millisecondsToFullSpeed) * Math.signum(gamepad1.left_stick_x);
-
-                    leftFrontSpeed += rotationSpeed;
-                    leftBackSpeed += leftFrontSpeed;
-                    rightBackSpeed -= leftFrontSpeed;
-                    rightFrontSpeed -= rightBackSpeed;
-                } else {
-                    rotate_accel.reset();
-                }
-
-                // scale all speeds so the max is 1, if needed
-                double maxSpeed = MathFunctions.absMax(leftBackSpeed, leftFrontSpeed, rightBackSpeed, rightFrontSpeed);
-                if (maxSpeed > 1) {
-                    leftBackSpeed /= maxSpeed;
-                    rightBackSpeed /= maxSpeed;
-                    leftFrontSpeed /= maxSpeed;
-                    rightFrontSpeed /= maxSpeed;
-                }
-
-                // multiply by speed adjust
-                leftFrontSpeed *= drivetrainSpeedAdjust / 5.0;
-                rightFrontSpeed *= drivetrainSpeedAdjust / 5.0;
-                leftBackSpeed *= drivetrainSpeedAdjust / 5.0;
-                rightBackSpeed *= drivetrainSpeedAdjust / 5.0;
-
-
-            } else if (mode.equals("MODE_TANK")) {
-                // left - left joystick
-                // right - right joystick
-                leftFrontSpeed = leftBackSpeed = -drivetrainSpeedAdjust * gamepad1.left_stick_y / 5;
-                rightFrontSpeed = rightBackSpeed = -drivetrainSpeedAdjust * gamepad1.right_stick_y / 5;
-
-                // strafe
-                if (gamepad1.left_bumper || gamepad1.right_bumper) {
-//                    double strafeSpeed = Math.min(drivetrainSpeedAdjust / 5.0, strafe_accel.milliseconds() / millisecondsToFullSpeed);
-                    double strafeSpeed = drivetrainSpeedAdjust / 5.0;
-
-                    if (gamepad1.left_bumper) {
-                        leftFrontSpeed = rightBackSpeed = -strafeSpeed;
-                        leftBackSpeed = rightFrontSpeed = strafeSpeed;
-                    } else if (gamepad1.right_bumper) {
-                        leftFrontSpeed = rightBackSpeed = strafeSpeed;
-                        leftBackSpeed = rightFrontSpeed = -strafeSpeed;
-                    }
-
-                } else {
-                    strafe_accel.reset();
-                }
+            } else {
+                strafe_accel.reset();
             }
 
             // dpad drive controls
