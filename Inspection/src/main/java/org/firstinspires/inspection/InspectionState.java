@@ -63,7 +63,7 @@ import java.util.List;
 /**
  * {@link InspectionState} contains the inspection state of either a RC or a DS
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "deprecation"})
 public class InspectionState
     {
     //----------------------------------------------------------------------------------------------

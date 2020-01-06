@@ -48,7 +48,7 @@ public class DriveConstants {
     public static double WHEEL_RADIUS = 1.9685;
 //    public static double WHEEL_RADIUS = 1.14173;
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 16.5;
+    public static double TRACK_WIDTH = 17.7;
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -59,7 +59,7 @@ public class DriveConstants {
 
     // on lounge carpet
 //    public static double kV = 0.01649;
-    public static double kV = 0.0123;
+    public static double kV = 0.01085;
     public static double kA = 0.00032;
     public static double kStatic = 0.09562;
 
@@ -72,7 +72,7 @@ public class DriveConstants {
      * forces acceleration-limited profiling).
      */
     public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
-            10.0, 10.0, 0.0,
+            40, 20, 0,
             Math.toRadians(180.0), Math.toRadians(180.0), 0.0
     );
 
