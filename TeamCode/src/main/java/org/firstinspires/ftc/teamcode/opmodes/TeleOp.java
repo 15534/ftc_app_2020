@@ -226,7 +226,7 @@ public class TeleOp extends LinearOpMode {
             // intake/outtake
             if (gamepad1.a || gamepad2.a) {
                 // intake
-                intakeSpeed = 0.6;
+                intakeSpeed = 0.65;
                 lastIntakeButton = "on";
             } else if (gamepad1.b || gamepad2.b) {
                 // outtake
@@ -546,7 +546,7 @@ public class TeleOp extends LinearOpMode {
 
 
             // set foundation gripper powers
-            robot.foundation_left.setPower(foundationGripperSpeed);
+//            robot.foundation_left.setPower(foundationGripperSpeed);
             robot.foundation_right.setPower(foundationGripperSpeed);
 
             // set motor powers
@@ -565,7 +565,7 @@ public class TeleOp extends LinearOpMode {
             telemetry.update();
         }
 
-        robot.foundation_left.setPower(0);
+//        robot.foundation_left.setPower(0);
         robot.foundation_right.setPower(0);
     }
 

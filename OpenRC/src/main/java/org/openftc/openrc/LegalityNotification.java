@@ -35,6 +35,7 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.util.concurrent.CountDownLatch;
 
+@SuppressWarnings("deprecation")
 public class LegalityNotification
 {
     private static boolean alreadyShownWarningThisSession = false;
