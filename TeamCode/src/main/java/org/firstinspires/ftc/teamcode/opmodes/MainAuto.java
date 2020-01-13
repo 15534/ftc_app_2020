@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.path.heading.ConstantInterpolator;
@@ -23,6 +25,11 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_G;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_i;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
+
 /*
  * Op mode for tuning follower PID coefficients (located in the drive base classes). The robot
  * drives in a DISTANCE-by-DISTANCE square indefinitely.
@@ -36,9 +43,10 @@ public class MainAuto extends LinearOpMode {
     HardwareDrivetrain robot = new HardwareDrivetrain();
 
     enum State {
-        INTAKE_OUT_AND_IN, RESET_SERVOS, STOP_INTAKE, START_INTAKE, REVERSE_INTAKE, DROP_GRIPPERS_HALFWAY
+        INTAKE_OUT_AND_IN, RESET_SERVOS, STOP_INTAKE, START_INTAKE, REVERSE_INTAKE,
+        DROP_GRIPPERS_HALFWAY, DROP_GRIPPERS_FULLY, LIFT_GRIPPERS, GO_TO_STACK_POSITION,
+        GO_TO_LIFT_POSITION
     }
-
     @Override
     public void runOpMode() throws InterruptedException {
         // starts on blue side
@@ -54,6 +62,11 @@ public class MainAuto extends LinearOpMode {
         robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
+        PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
+                0, x -> k_G);
+        double target = 0;  // target lift position
+
         // TODO detect stone position here
         // 65 (back), 96 (middle) 187 (front), 20 (front)
 
@@ -64,10 +77,36 @@ public class MainAuto extends LinearOpMode {
         skyStoneDetector = new SkystoneDetector();
         phoneCam.setPipeline(skyStoneDetector);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
-
         double xPosition;
         int stonePosition = 0;  // 0: front, 1: center, 2: back
+
+        boolean exposureLocked = false;
+        boolean xPressed = true;
+        int exposureCompensation = 0;
+
         while(!isStarted()) {
+            if (gamepad2.x) {
+                if (!xPressed)
+                    exposureLocked = !exposureLocked;
+                xPressed = true;
+            } else {
+                xPressed = false;
+            }
+
+            if (!exposureLocked) {
+                if (gamepad2.a) {
+                    exposureCompensation = Math.max(exposureCompensation - 1, phoneCam.getMinSupportedExposureCompensation());
+                } else if (gamepad2.b) {
+                    exposureCompensation = Math.min(exposureCompensation + 1, phoneCam.getMaxSupportedExposureCompensation());
+                }
+            } else {
+                telemetry.addLine("EXPOSURE LOCKED");
+            }
+            phoneCam.setExposureCompensation(exposureCompensation);
+            phoneCam.setExposureLocked(exposureLocked);  // TODO check if this works
+
+            telemetry.addData("EXPOSURE COMPENSATION", exposureCompensation);
+
             xPosition = skyStoneDetector.getScreenPosition().x;
             if (xPosition < 1) {
                 // do nothing
@@ -120,7 +159,25 @@ public class MainAuto extends LinearOpMode {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(90, -31), new LinearInterpolator(Math.toRadians(-180), Math.toRadians(-90)))
+                    .lineTo(new Vector2d(80, -31), new LinearInterpolator(Math.toRadians(-180), Math.toRadians(-90)))
+                    .addMarker(() -> {
+                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+//                    stateTimes.put(State.GO_TO_STACK_POSITION, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(80, -35), new ConstantInterpolator(Math.toRadians(90)))
+                    .addMarker(() -> {
+//                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(56, -19), new SplineInterpolator(Math.toRadians(90), Math.toRadians(180)))
+                    .addMarker(() -> {
+                        stateTimes.put(State.LIFT_GRIPPERS, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(76, -19), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
                     .build();
         } else if (stonePosition == 1) {
             telemetry.addLine("CENTER");
@@ -141,8 +198,25 @@ public class MainAuto extends LinearOpMode {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(90, -31), new LinearInterpolator(Math.toRadians(-180), Math.toRadians(-90)))
-
+                    .lineTo(new Vector2d(80, -31), new LinearInterpolator(Math.toRadians(-180), Math.toRadians(-90)))
+                    .addMarker(() -> {
+                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+//                    stateTimes.put(State.GO_TO_STACK_POSITION, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(80, -35), new ConstantInterpolator(Math.toRadians(90)))
+                    .addMarker(() -> {
+//                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(56, -19), new SplineInterpolator(Math.toRadians(90), Math.toRadians(180)))
+                    .addMarker(() -> {
+                        stateTimes.put(State.LIFT_GRIPPERS, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(76, -19), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
                     .build();
 
         } else {
@@ -161,7 +235,25 @@ public class MainAuto extends LinearOpMode {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(90, -31), new LinearInterpolator(Math.toRadians(-180), Math.toRadians(-90)))
+                    .lineTo(new Vector2d(80, -31), new LinearInterpolator(Math.toRadians(-180), Math.toRadians(-90)))
+                    .addMarker(() -> {
+                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+//                    stateTimes.put(State.GO_TO_STACK_POSITION, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(80, -35), new ConstantInterpolator(Math.toRadians(90)))
+                    .addMarker(() -> {
+//                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(56, -19), new SplineInterpolator(Math.toRadians(90), Math.toRadians(180)))
+                    .addMarker(() -> {
+                        stateTimes.put(State.LIFT_GRIPPERS, null);
+                        return null;
+                    })
+                    .lineTo(new Vector2d(76, -19), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
                     .build();
         }
 
@@ -236,12 +328,10 @@ public class MainAuto extends LinearOpMode {
                     robot.right_v4b.setPosition(0.6);
                     robot.push_servo.setPosition(0.35);
                     robot.gripper_servo.setPosition(1);
-//                    robot.foundation_left.setPower(-1);
                     robot.foundation_right.setPower(-1);
                 } else if (elapsedTime < 1000) {
                     robot.left_intake.setPower(0.8);
                     robot.right_intake.setPower(0.8);
-//                    robot.foundation_left.setPower(0);/
                     robot.foundation_right.setPower(0);
                 } else {
                     // start intake
@@ -259,23 +349,89 @@ public class MainAuto extends LinearOpMode {
                 if (startTime != null) {
                     elapsedTime = timer.milliseconds() - startTime;
                 }
-                telemetry.addData("START TIME", startTime);
-                telemetry.addData("CURRENT TIME", currentTime);
-                telemetry.addData("DROP_GRIPPERS_HALFWAY", elapsedTime);
 
-                if (elapsedTime < 2000) {
-                    telemetry.addLine("GOING UP");
-//                    robot.foundation_left.setPower(-1);
-                    robot.foundation_right.setPower(-1);
+                if (elapsedTime < 250) {
+                    robot.foundation_left.setPosition(0.5);
+                    robot.foundation_right.setPower(0.5);
                 } else {
                     telemetry.addLine("STOPPING");
-//                    robot.foundation_left.setPower(0);
                     robot.foundation_right.setPower(0);
-//                    stateTimes.remove(State.DROP_GRIPPERS_HALFWAY);
+                    stateTimes.remove(State.DROP_GRIPPERS_HALFWAY);
                 }
             }
-            telemetry.addData("stateTimes", stateTimes);
 
+            // drop grippers fully
+            if (stateTimes.containsKey(State.DROP_GRIPPERS_FULLY)) {
+                robot.foundation_left.setPosition(1);
+                robot.foundation_right.setPower(0.5);
+                stateTimes.remove(State.DROP_GRIPPERS_FULLY);
+            }
+
+            if (stateTimes.containsKey(State.LIFT_GRIPPERS)) {
+                // initialize servos
+                Double startTime = stateTimes.get(State.LIFT_GRIPPERS);
+                double elapsedTime = 0;
+                if (startTime != null) {
+                    elapsedTime = timer.milliseconds() - startTime;
+                }
+
+                if (elapsedTime < 1000) {
+                    robot.foundation_left.setPosition(0);
+                    robot.foundation_right.setPower(-0.5);
+                } else {
+                    robot.foundation_right.setPower(0);
+                    stateTimes.remove(State.LIFT_GRIPPERS);
+                }
+            }
+
+            if (stateTimes.containsKey(State.GO_TO_STACK_POSITION)) {
+                // initialize servos
+                Double startTime = stateTimes.get(State.GO_TO_STACK_POSITION);
+                double elapsedTime = 0;
+                if (startTime != null) {
+                    elapsedTime = timer.milliseconds() - startTime;
+                }
+
+                if (elapsedTime < 300) {
+                    robot.push_servo.setPosition(0.35);
+                    robot.gripper_servo.setPosition(1);
+                } else if (elapsedTime < 600) {
+                    robot.push_servo.setPosition(1);
+                } else if (elapsedTime < 900) {
+                    robot.left_v4b.setPosition(0.75);
+                    robot.right_v4b.setPosition(0.75);
+                } else if (elapsedTime < 1200) {
+                    robot.gripper_servo.setPosition(0.6);
+                } else {
+                    stateTimes.remove(State.GO_TO_STACK_POSITION);
+                }
+            }
+
+            if (stateTimes.containsKey(State.GO_TO_LIFT_POSITION)) {
+                // initialize servos
+                Double startTime = stateTimes.get(State.GO_TO_LIFT_POSITION);
+                double elapsedTime = 0;
+                if (startTime != null) {
+                    elapsedTime = timer.milliseconds() - startTime;
+                }
+
+                if (elapsedTime < 300) {
+                    // get pusher out of the way
+                    robot.push_servo.setPosition(0.35);
+                } else if (elapsedTime < 500){
+                    target = -100;
+                } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) < 5) {
+                    stateTimes.remove(State.GO_TO_LIFT_POSITION);
+                }
+            }
+
+            // use PID to hold lift position
+            controller.setTargetPosition(target);
+            double correction = controller.update(robot.lift_left.getCurrentPosition());
+            robot.lift_left.setPower(correction);
+            robot.lift_right.setPower(correction);
+
+            telemetry.addData("stateTimes", stateTimes);
             telemetry.update();
         }
     }
