@@ -560,6 +560,13 @@ public class TeleOp extends LinearOpMode {
 
             robot.right_intake.setPower(intakeSpeed);
             robot.left_intake.setPower(intakeSpeed);
+            if (Math.abs(intakeSpeed) < 1e-5) {
+                robot.intake_wheel.setPower(0);
+            } else if (intakeSpeed > 0) {
+                robot.intake_wheel.setPower(1);
+            } else {
+                robot.intake_wheel.setPower(-1);
+            }
 
             // update telemetry
             telemetry.addData("current", robot.lift_left.getCurrentPosition());

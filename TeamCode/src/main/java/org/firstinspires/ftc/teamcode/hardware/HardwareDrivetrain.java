@@ -47,6 +47,7 @@ public class HardwareDrivetrain
 
     public Servo push_servo, gripper_servo, left_v4b, right_v4b;
     public Servo foundation_left, foundation_right;
+    public CRServo intake_wheel;
     public PwmControl left_v4b_pwm, right_v4b_pwm;
 
     public DcMotor  lift_left   = null;
@@ -98,6 +99,7 @@ public class HardwareDrivetrain
 
         left_intake = hardwareMap.dcMotor.get(HardwareNames.left_intake);
         right_intake = hardwareMap.dcMotor.get(HardwareNames.right_intake);
+        intake_wheel = hardwareMap.crservo.get(HardwareNames.intake_wheel);
 
         verticalLeft = hardwareMap.dcMotor.get(HardwareNames.left_encoder);
         verticalRight = hardwareMap.dcMotor.get(HardwareNames.right_encoder);
@@ -134,6 +136,7 @@ public class HardwareDrivetrain
         // intake
         left_intake.setDirection(DcMotorSimple.Direction.FORWARD);
         right_intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake_wheel.setDirection(DcMotorSimple.Direction.REVERSE);
         left_intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right_intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 

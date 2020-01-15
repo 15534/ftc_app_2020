@@ -7,6 +7,7 @@ public class HardwareNames {
     public static final String right_back = "right_back";
     public static final String left_intake = "left_intake";
     public static final String right_intake = "right_intake";
+    public static final String intake_wheel = "intake_wheel";
 
     public static final String left_encoder = right_front;
     public static final String right_encoder = left_front;
