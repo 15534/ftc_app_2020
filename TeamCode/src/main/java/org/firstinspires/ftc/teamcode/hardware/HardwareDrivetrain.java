@@ -46,8 +46,7 @@ public class HardwareDrivetrain
     public DcMotor left_intake, right_intake;
 
     public Servo push_servo, gripper_servo, left_v4b, right_v4b;
-    public Servo foundation_left;
-    public CRServo foundation_right;
+    public Servo foundation_left, foundation_right;
     public PwmControl left_v4b_pwm, right_v4b_pwm;
 
     public DcMotor  lift_left   = null;
@@ -69,8 +68,8 @@ public class HardwareDrivetrain
         gripper_servo = hardwareMap.servo.get(HardwareNames.gripper_servo);
 
         foundation_left = hardwareMap.servo.get(HardwareNames.foundation_left);
-        foundation_right = hardwareMap.crservo.get(HardwareNames.foundation_right);
-        foundation_right.setDirection(CRServo.Direction.FORWARD);
+        foundation_right = hardwareMap.servo.get(HardwareNames.foundation_right);
+        foundation_right.setDirection(Servo.Direction.FORWARD);
         foundation_left.setDirection(Servo.Direction.REVERSE);
 
         left_v4b = hardwareMap.servo.get(HardwareNames.left_v4b);

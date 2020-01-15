@@ -542,12 +542,15 @@ public class TeleOp extends LinearOpMode {
             }
 
             // foundation gripper
-            foundationGripperSpeed = gamepad2.left_stick_y;
-
-
-            // set foundation gripper powers
-//            robot.foundation_left.setPower(foundationGripperSpeed);
-            robot.foundation_right.setPower(foundationGripperSpeed);
+            if (gamepad2.left_stick_y < -0.05) {
+                // down
+                robot.foundation_left.setPosition(1);
+                robot.foundation_right.setPosition(1);
+            } else if (gamepad2.left_stick_y > 0.05) {
+                // up
+                robot.foundation_left.setPosition(0.1);
+                robot.foundation_right.setPosition(0.1);
+            }
 
             // set motor powers
             robot.left_back.setPower(leftBackSpeed);
@@ -564,9 +567,6 @@ public class TeleOp extends LinearOpMode {
             telemetry.addData("desiredLiftPosition", desiredLiftPosition);
             telemetry.update();
         }
-
-//        robot.foundation_left.setPower(0);
-        robot.foundation_right.setPower(0);
     }
 
     /**

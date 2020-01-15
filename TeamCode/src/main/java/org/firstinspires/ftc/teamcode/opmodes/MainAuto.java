@@ -23,7 +23,6 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_G;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
@@ -128,8 +127,6 @@ public class MainAuto extends LinearOpMode {
         }
 
 
-        waitForStart();
-        if (isStopRequested()) return;
         phoneCam.pauseViewport();
         phoneCam.stopStreaming();
 
@@ -137,6 +134,7 @@ public class MainAuto extends LinearOpMode {
         HashMap<State, Double> stateTimes = new HashMap<>();  // map of state -> start time
 
         Trajectory trajectory = null;
+
 
         if (stonePosition == 0) {
             telemetry.addLine("FRONT"); telemetry.update();
@@ -328,11 +326,11 @@ public class MainAuto extends LinearOpMode {
                     robot.right_v4b.setPosition(0.6);
                     robot.push_servo.setPosition(0.35);
                     robot.gripper_servo.setPosition(1);
-                    robot.foundation_right.setPower(-1);
+                    robot.foundation_left.setPosition(0.1);
+                    robot.foundation_right.setPosition(0.1);
                 } else if (elapsedTime < 1000) {
                     robot.left_intake.setPower(0.8);
                     robot.right_intake.setPower(0.8);
-                    robot.foundation_right.setPower(0);
                 } else {
                     // start intake
                     robot.left_intake.setPower(0.6);
@@ -343,45 +341,22 @@ public class MainAuto extends LinearOpMode {
 
             // drop grippers
             if (stateTimes.containsKey(State.DROP_GRIPPERS_HALFWAY)) {
-                // initialize servos
-                Double startTime = stateTimes.get(State.DROP_GRIPPERS_HALFWAY);
-                double elapsedTime = 0;
-                if (startTime != null) {
-                    elapsedTime = timer.milliseconds() - startTime;
-                }
-
-                if (elapsedTime < 250) {
-                    robot.foundation_left.setPosition(0.5);
-                    robot.foundation_right.setPower(0.5);
-                } else {
-                    telemetry.addLine("STOPPING");
-                    robot.foundation_right.setPower(0);
-                    stateTimes.remove(State.DROP_GRIPPERS_HALFWAY);
-                }
+                robot.foundation_left.setPosition(0.5);
+                robot.foundation_right.setPosition(0.5);
+                stateTimes.remove(State.DROP_GRIPPERS_HALFWAY);
             }
 
             // drop grippers fully
             if (stateTimes.containsKey(State.DROP_GRIPPERS_FULLY)) {
                 robot.foundation_left.setPosition(1);
-                robot.foundation_right.setPower(0.5);
+                robot.foundation_right.setPosition(1);
                 stateTimes.remove(State.DROP_GRIPPERS_FULLY);
             }
 
             if (stateTimes.containsKey(State.LIFT_GRIPPERS)) {
-                // initialize servos
-                Double startTime = stateTimes.get(State.LIFT_GRIPPERS);
-                double elapsedTime = 0;
-                if (startTime != null) {
-                    elapsedTime = timer.milliseconds() - startTime;
-                }
-
-                if (elapsedTime < 1000) {
-                    robot.foundation_left.setPosition(0);
-                    robot.foundation_right.setPower(-0.5);
-                } else {
-                    robot.foundation_right.setPower(0);
-                    stateTimes.remove(State.LIFT_GRIPPERS);
-                }
+                robot.foundation_left.setPosition(0.1);
+                robot.foundation_right.setPosition(0.1);
+                stateTimes.remove(State.LIFT_GRIPPERS);
             }
 
             if (stateTimes.containsKey(State.GO_TO_STACK_POSITION)) {

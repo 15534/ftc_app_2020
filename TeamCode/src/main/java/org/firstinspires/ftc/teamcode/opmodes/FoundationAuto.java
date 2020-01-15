@@ -163,11 +163,11 @@ public class FoundationAuto extends LinearOpMode {
                     robot.right_v4b.setPosition(0.6);
                     robot.push_servo.setPosition(0.35);
                     robot.gripper_servo.setPosition(1);
-                    robot.foundation_right.setPower(-1);
+//                    robot.foundation_right.setPower(-1);
                 } else if (elapsedTime < 1000) {
                     robot.left_intake.setPower(0.8);
                     robot.right_intake.setPower(0.8);
-                    robot.foundation_right.setPower(0);
+//                    robot.foundation_right.setPower(0);
                 } else {
                     // start intake
                     robot.left_intake.setPower(0.6);
@@ -187,18 +187,18 @@ public class FoundationAuto extends LinearOpMode {
 
                 if (elapsedTime < 250) {
                     robot.foundation_left.setPosition(0.5);
-                    robot.foundation_right.setPower(0.5);
+//                    robot.foundation_right.setPower(0.5);
                 } else {
                     telemetry.addLine("STOPPING");
-                    robot.foundation_right.setPower(0);
+//                    robot.foundation_right.setPower(0);
                     stateTimes.remove(State.DROP_GRIPPERS_HALFWAY);
                 }
             }
 
             // drop grippers fully
             if (stateTimes.containsKey(State.DROP_GRIPPERS_FULLY)) {
-                robot.foundation_left.setPosition(1);
-                robot.foundation_right.setPower(0.5);
+//                robot.foundation_left.setPosition(1);
+//                robot.foundation_right.setPower(0.5);
                 stateTimes.remove(State.DROP_GRIPPERS_FULLY);
             }
 
@@ -212,9 +212,9 @@ public class FoundationAuto extends LinearOpMode {
 
                 if (elapsedTime < 1000) {
                     robot.foundation_left.setPosition(0);
-                    robot.foundation_right.setPower(-0.5);
+//                    robot.foundation_right.setPower(-0.5);
                 } else {
-                    robot.foundation_right.setPower(0);
+//                    robot.foundation_right.setPower(0);
                     stateTimes.remove(State.LIFT_GRIPPERS);
                 }
             }
