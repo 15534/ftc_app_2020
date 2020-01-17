@@ -277,6 +277,7 @@ public class TeleOp extends LinearOpMode {
 
 
             // go to stacking position routine
+            // TODO add automatic pusher routine
             if (stack_routine_time == null && gamepad2.dpad_right) {
                 stack_routine_time = new ElapsedTime();
             }

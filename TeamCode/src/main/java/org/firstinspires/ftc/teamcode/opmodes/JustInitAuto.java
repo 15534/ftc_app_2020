@@ -50,19 +50,21 @@ public class JustInitAuto extends LinearOpMode {
 
         waitForStart();
 
-        sleep(5000);
+//        sleep(5000);
+        robot.left_v4b.setPosition(0.6);
+        robot.right_v4b.setPosition(0.6);
+        sleep(500);
         robot.left_intake.setPower(0.8);
         robot.right_intake.setPower(0.8);
-        sleep(500);
+        sleep(1000);
         robot.left_intake.setPower(0);
         robot.right_intake.setPower(0);
         sleep(500);
-        robot.left_v4b.setPosition(0.6);
-        robot.right_v4b.setPosition(0.6);
         robot.push_servo.setPosition(0.35);
         robot.gripper_servo.setPosition(1);
         robot.foundation_right.setPosition(0.2);
         robot.foundation_left.setPosition(0.46);
+        sleep(1000);
     }
 }
 

@@ -33,8 +33,8 @@ import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
  * drives in a DISTANCE-by-DISTANCE square indefinitely.
  */
 @Config
-@Autonomous(group = "drive", name = "Autonomous")
-public class MainAuto extends LinearOpMode {
+@Autonomous(group = "drive", name = "Red Auto")
+public class RedAuto extends LinearOpMode {
     private OpenCvInternalCamera phoneCam;
     private SkystoneDetector skyStoneDetector;
 
@@ -71,7 +71,7 @@ public class MainAuto extends LinearOpMode {
         double target = 0;  // target lift position
 
         // TODO detect stone position here
-        // 65 (back), 96 (middle) 187 (front), 20 (front)
+        // 142 (front) 85 (center) 30 (back)
 
         // setup camera
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -116,13 +116,13 @@ public class MainAuto extends LinearOpMode {
             } else if (xPosition < 15) {
                 stonePosition = 0;
                 telemetry.addData("position", "front");
-            } else if (xPosition < 75) {
+            } else if (xPosition < 65) {
                 stonePosition = 2;
                 telemetry.addData("position", "back");
-            } else if (xPosition < 130) {
+            } else if (xPosition < 120) {
                 stonePosition = 1;
                 telemetry.addData("position", "center");
-            } else if (xPosition < 230) {
+            } else if (xPosition < 220) {
                 stonePosition = 0;
                 telemetry.addData("position", "front");
             }
