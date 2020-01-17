@@ -17,7 +17,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.mecanum.VertexDrive;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
-import org.jetbrains.annotations.NotNull;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
@@ -61,7 +60,7 @@ public class MainAuto extends LinearOpMode {
         robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        robot.push_servo.setPosition(0.35);
+        robot.push_servo.setPosition(0);
         robot.gripper_servo.setPosition(1);
         robot.foundation_right.setPosition(0);
         robot.foundation_left.setPosition(0);
@@ -302,7 +301,7 @@ public class MainAuto extends LinearOpMode {
                 if (elapsedTime < 500) {
                     robot.left_v4b.setPosition(0.6);
                     robot.right_v4b.setPosition(0.6);
-                    robot.push_servo.setPosition(0.35);
+                    robot.push_servo.setPosition(0);
                     robot.gripper_servo.setPosition(1);
                     robot.foundation_right.setPosition(0.2);
                     robot.foundation_left.setPosition(0.46);
@@ -313,6 +312,7 @@ public class MainAuto extends LinearOpMode {
                     // start intake
                     robot.left_intake.setPower(0.6);
                     robot.right_intake.setPower(0.6);
+                    robot.push_servo.setPosition(0.35);
                     stateTimes.remove(State.RESET_SERVOS);
                 }
             }
