@@ -79,6 +79,8 @@ public class TeleOp extends LinearOpMode {
     private boolean leftTriggerPressed;
     private boolean rightTriggerPressed = false;
     private boolean gamepad2XYPressed = false;
+    private boolean gamepad1YPressed = false;
+    private boolean gamepad2RightButtonPressed = false;
 
     @Override
     public void runOpMode() {
@@ -105,10 +107,12 @@ public class TeleOp extends LinearOpMode {
         positionThread.start();
 
         // initialize servos
+        double lastGripperPosition = 1;
+
         robot.left_v4b.setPosition(0.6);
         robot.right_v4b.setPosition(0.6);
         robot.push_servo.setPosition(0.35);
-        robot.gripper_servo.setPosition(1);
+        robot.gripper_servo.setPosition(lastGripperPosition);
         robot.foundation_right.setPosition(0.2);
         robot.foundation_left.setPosition(0.46);
 
@@ -244,6 +248,20 @@ public class TeleOp extends LinearOpMode {
                 lastIntakeButton = "stop";
             }
 
+            // capstone
+            if (gamepad1.y && !gamepad1YPressed) {
+                gamepad1YPressed = true;
+                double currentGripperPosition = robot.gripper_servo.getPosition();
+                if (currentGripperPosition < 0.01) {
+                    robot.gripper_servo.setPosition(lastGripperPosition);
+                } else {
+                    lastGripperPosition = currentGripperPosition;
+                    robot.gripper_servo.setPosition(0);
+                }
+            } else if (!gamepad1.y) {
+                gamepad1YPressed = false;
+            }
+
             // reset orientation
             if (gamepad1.y) {
                 globalPositionUpdate.setOrientation(0);
@@ -252,8 +270,6 @@ public class TeleOp extends LinearOpMode {
             // gamepad 2
 
             // manually adjust lift
-            // TODO change to modify a target position rather than directly set powers
-            // TODO except when the position is close to 0, then automatically flush with the robot
             if (gamepad2.left_bumper) {
                 target += 5;
             } else if (gamepad2.right_bumper) {
@@ -284,13 +300,17 @@ public class TeleOp extends LinearOpMode {
             if (stack_routine_time != null) {
                 if (stack_routine_time.milliseconds() < 300) {
                     robot.push_servo.setPosition(0.35);
-                    robot.gripper_servo.setPosition(1);
                 } else if (stack_routine_time.milliseconds() < 600) {
                     robot.push_servo.setPosition(1);
                 } else if (stack_routine_time.milliseconds() < 900) {
+                    robot.push_servo.setPosition(0.35);
+                    robot.gripper_servo.setPosition(1);
+                } else if (stack_routine_time.milliseconds() < 1200) {
+                    robot.push_servo.setPosition(1);
+                } else if (stack_routine_time.milliseconds() < 1500) {
                     robot.left_v4b.setPosition(0.75);
                     robot.right_v4b.setPosition(0.75);
-                } else if (stack_routine_time.milliseconds() < 1200) {
+                } else if (stack_routine_time.milliseconds() < 1800) {
                     robot.gripper_servo.setPosition(0.6);
                     intakeSpeed = 0;
                     lastIntakeButton = "stop";
@@ -545,14 +565,14 @@ public class TeleOp extends LinearOpMode {
             }
 
             // foundation gripper
-            if (gamepad2.left_stick_y < -0.05) {
+            if (gamepad2.left_stick_y > 0.05) {
                 // down
                 robot.foundation_left.setPosition(1);
                 robot.foundation_right.setPosition(1);
-            } else if (gamepad2.left_stick_y > 0.05) {
+            } else if (gamepad2.left_stick_y < -0.05) {
                 // up
-                robot.foundation_left.setPosition(0.25);
-                robot.foundation_right.setPosition(0.25);
+                robot.foundation_right.setPosition(0.2);
+                robot.foundation_left.setPosition(0.46);
             }
 
             // set motor powers

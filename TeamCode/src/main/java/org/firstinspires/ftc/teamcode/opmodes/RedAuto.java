@@ -50,7 +50,7 @@ public class RedAuto extends LinearOpMode {
         // starts on blue side
         VertexDrive drive = new VertexDrive(hardwareMap);
 
-        drive.setPoseEstimate(new Pose2d(0, 0, 0));
+        drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(180)));
         robot.init(hardwareMap);
 
         // reset lift encoders
@@ -111,20 +111,17 @@ public class RedAuto extends LinearOpMode {
             telemetry.addData("EXPOSURE COMPENSATION", exposureCompensation);
 
             xPosition = skyStoneDetector.getScreenPosition().x;
-            if (xPosition < 1) {
+            if (xPosition < 15) {
                 // do nothing
-            } else if (xPosition < 15) {
+            } else if (xPosition < 65) {
                 stonePosition = 0;
                 telemetry.addData("position", "front");
-            } else if (xPosition < 65) {
-                stonePosition = 2;
-                telemetry.addData("position", "back");
-            } else if (xPosition < 120) {
+            } else if (xPosition < 140) {
                 stonePosition = 1;
                 telemetry.addData("position", "center");
             } else if (xPosition < 220) {
-                stonePosition = 0;
-                telemetry.addData("position", "front");
+                stonePosition = 2;
+                telemetry.addData("position", "back");
             }
             telemetry.addData("xPosition", xPosition);
             telemetry.update();
@@ -139,7 +136,6 @@ public class RedAuto extends LinearOpMode {
 
         Trajectory trajectory = null;
 
-//        stonePosition = 0;
 //        drive.setPoseEstimate(new Pose2d(84, -28, Math.toRadians(90)));
 
         if (stonePosition == 0) {
@@ -149,26 +145,31 @@ public class RedAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(-2, -24), new SplineInterpolator(0, Math.toRadians(-45)))
-                    .lineTo(new Vector2d(12, -32), new ConstantInterpolator(Math.toRadians(-45)))
-                    .lineTo(new Vector2d(16, -35), new ConstantInterpolator(Math.toRadians(-45)))
-                    .lineTo(new Vector2d(25, -23), new LinearInterpolator(Math.toRadians(-45), Math.toRadians(-135)))
+                    .lineTo(new Vector2d(0, 6), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(-8, 30), new LinearInterpolator(Math.toRadians(180), Math.toRadians(-135)))
+                    .lineTo(new Vector2d(0, 38), new ConstantInterpolator(Math.toRadians(45)))
+                    .lineTo(new Vector2d(12, 26), new LinearInterpolator(Math.toRadians(45), Math.toRadians(135)))
                     .addMarker(() -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                         stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+                    .addMarker(new Vector2d(30, 26), () -> {
+                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                        return null;
+                    })
+                    // from here it is the same for all three positions
+                    .lineTo(new Vector2d(70, 26), new ConstantInterpolator(Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(87, -32), new ConstantInterpolator(Math.toRadians(90)))
-                    .addMarker(new Vector2d(87, -34), () -> {
+                    .lineTo(new Vector2d(82, 28), new ConstantInterpolator(Math.toRadians(-90)))
+                    .addMarker(new Vector2d(82, 32), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
+                    .lineTo(new Vector2d(82, 34), new ConstantInterpolator(Math.toRadians(-90)))
                     .build();
         } else if (stonePosition == 1) {
             telemetry.addLine("CENTER");
@@ -178,28 +179,27 @@ public class RedAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(10, -26), new SplineInterpolator(0, Math.toRadians(-135)))
-                    .lineTo(new Vector2d(15, -26), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(15, -29.5), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(10.5, -34.5), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(24, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
-                    .addMarker(() -> {
+                    .lineTo(new Vector2d(0, 6), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(8, 34), new SplineInterpolator(Math.toRadians(180), Math.toRadians(135)))
+                    .lineTo(new Vector2d(2, 28), new ConstantInterpolator(Math.toRadians(135)))
+                    .lineTo(new Vector2d(12, 26), new SplineInterpolator(Math.toRadians(135), Math.toRadians(180)))
+                    .addMarker(new Vector2d(30, 26), () -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+                    // from here it is the same for all three positions
+                    .lineTo(new Vector2d(70, 26), new ConstantInterpolator(Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(87, -32), new ConstantInterpolator(Math.toRadians(90)))
-                    .addMarker(new Vector2d(87, -34), () -> {
+                    .lineTo(new Vector2d(82, 28), new ConstantInterpolator(Math.toRadians(-90)))
+                    .addMarker(new Vector2d(82, 32), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
+                    .lineTo(new Vector2d(82, 34), new ConstantInterpolator(Math.toRadians(-90)))
                     .build();
-
         } else {
             telemetry.addLine("BACK"); telemetry.update();
             trajectory = drive.trajectoryBuilder()
@@ -207,26 +207,27 @@ public class RedAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(11, -29), new SplineInterpolator(0, Math.toRadians(-135)))
-                    .lineTo(new Vector2d(4, -33), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(22, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
-                    .addMarker(() -> {
+                    .lineTo(new Vector2d(0, 6), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(0, 34), new SplineInterpolator(Math.toRadians(180), Math.toRadians(135)))
+                    .lineTo(new Vector2d(-2, 36), new ConstantInterpolator(Math.toRadians(135)))
+                    .lineTo(new Vector2d(12, 26), new SplineInterpolator(Math.toRadians(135), Math.toRadians(180)))
+                    .addMarker(new Vector2d(30, 26), () -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+                    // from here it is the same for all three positions
+                    .lineTo(new Vector2d(70, 26), new ConstantInterpolator(Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(87, -32), new ConstantInterpolator(Math.toRadians(90)))
-                    .addMarker(new Vector2d(87, -34), () -> {
+                    .lineTo(new Vector2d(82, 28), new ConstantInterpolator(Math.toRadians(-90)))
+                    .addMarker(new Vector2d(82, 32), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
-                    .build();
-        }
+                    .lineTo(new Vector2d(82, 34), new ConstantInterpolator(Math.toRadians(-90)))
+                    .build();        }
 
         drive.followTrajectory(trajectory);
 //        robot.foundation_right.setPosition(0.2);
@@ -326,27 +327,21 @@ public class RedAuto extends LinearOpMode {
                 stateTimes.remove(State.DROP_GRIPPERS_FULLY);
 
                 Trajectory trajectory2 = drive.trajectoryBuilder()
-//                        .addMarker(() -> {
-//                            stateTimes.put(State.GO_TO_LIFT_POSITION, null);
-//                            return null;
-//                        })
                         .addMarker(() -> {
                             stateTimes.put(State.GO_TO_STACK_POSITION, null);
                             return null;
                         })
-                        .lineTo(new Vector2d(63, -19), new LinearInterpolator(Math.toRadians(90), Math.toRadians(90)))
+                        .lineTo(new Vector2d(58, 16), new LinearInterpolator(Math.toRadians(-90), Math.toRadians(-90)))
                         .addMarker(() -> {
                             stateTimes.put(State.LIFT_GRIPPERS, null);
                             return null;
                         })
-                        .lineTo(new Vector2d(58, -19), new ConstantInterpolator(Math.toRadians(180)))
-                        .addMarker(new Vector2d(74, -19), () -> {
+                        .lineTo(new Vector2d(56, 16), new ConstantInterpolator(Math.toRadians(180)))
+                        .addMarker(new Vector2d(74, 16), () -> {
                             stateTimes.put(State.GO_TO_LIFT_POSITION, null);
                             return null;
                         })
-                        .lineTo(new Vector2d(76, -19), new ConstantInterpolator(Math.toRadians(180)))
-//                        .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
-//                        .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
+                        .lineTo(new Vector2d(76, 16), new ConstantInterpolator(Math.toRadians(180)))
                         .build();
                 drive.followTrajectory(trajectory2);
             }
@@ -409,11 +404,11 @@ public class RedAuto extends LinearOpMode {
                 } else {
                     stateTimes.remove(State.DROP_BLOCK);
                     Trajectory trajectory2 = drive.trajectoryBuilder()
-                        .lineTo(new Vector2d(76, -28), new ConstantInterpolator(Math.toRadians(180)))
+                        .lineTo(new Vector2d(76, 26), new ConstantInterpolator(Math.toRadians(180)))
                         .build();
                     drive.followTrajectorySync(trajectory2);
                     Trajectory trajectory3 = drive.trajectoryBuilder()
-                            .lineTo(new Vector2d(40, -28), new ConstantInterpolator(Math.toRadians(180)))
+                            .lineTo(new Vector2d(32, 26), new ConstantInterpolator(Math.toRadians(180)))
                             .build();
                     drive.followTrajectorySync(trajectory3);
                 }
