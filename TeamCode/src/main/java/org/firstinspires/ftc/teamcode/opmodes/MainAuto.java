@@ -330,19 +330,23 @@ public class MainAuto extends LinearOpMode {
 //                            stateTimes.put(State.GO_TO_LIFT_POSITION, null);
 //                            return null;
 //                        })
+                        .addMarker(() -> {
+                            stateTimes.put(State.GO_TO_STACK_POSITION, null);
+                            return null;
+                        })
                         .lineTo(new Vector2d(63, -19), new LinearInterpolator(Math.toRadians(90), Math.toRadians(90)))
                         .addMarker(() -> {
                             stateTimes.put(State.LIFT_GRIPPERS, null);
                             return null;
                         })
                         .lineTo(new Vector2d(58, -19), new ConstantInterpolator(Math.toRadians(180)))
+                        .addMarker(new Vector2d(74, -19), () -> {
+                            stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+                            return null;
+                        })
                         .lineTo(new Vector2d(76, -19), new ConstantInterpolator(Math.toRadians(180)))
 //                        .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
 //                        .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
-                        .addMarker(() -> {
-                            stateTimes.put(State.GO_TO_STACK_POSITION, null);
-                            return null;
-                        })
                         .build();
                 drive.followTrajectory(trajectory2);
             }
@@ -375,7 +379,7 @@ public class MainAuto extends LinearOpMode {
                     robot.gripper_servo.setPosition(0.6);
                 } else {
                     stateTimes.remove(State.GO_TO_STACK_POSITION);
-                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+//                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
                 }
             }
 
@@ -392,14 +396,26 @@ public class MainAuto extends LinearOpMode {
                     robot.right_v4b.setPosition(0);
                 } else if (elapsedTime < 700) {
                     robot.gripper_servo.setPosition(1);
-                } else if (elapsedTime < 1300) {
+                } else if (elapsedTime < 1000) {
+                    // reset v4b's to grab position
+                    robot.left_v4b.setPosition(0.75);
+                    robot.right_v4b.setPosition(0.75);
+                } else if (elapsedTime < 1500) {
                     target = 0;
+                } else if (elapsedTime < 2000) {
+                    // reset v4b's to wait position
+                    robot.left_v4b.setPosition(0.6);
+                    robot.right_v4b.setPosition(0.6);
+                } else {
                     stateTimes.remove(State.DROP_BLOCK);
                     Trajectory trajectory2 = drive.trajectoryBuilder()
-                        .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
-                        .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
+                        .lineTo(new Vector2d(76, -28), new ConstantInterpolator(Math.toRadians(180)))
                         .build();
-                    drive.followTrajectory(trajectory2);
+                    drive.followTrajectorySync(trajectory2);
+                    Trajectory trajectory3 = drive.trajectoryBuilder()
+                            .lineTo(new Vector2d(40, -28), new ConstantInterpolator(Math.toRadians(180)))
+                            .build();
+                    drive.followTrajectorySync(trajectory3);
                 }
             }
 
