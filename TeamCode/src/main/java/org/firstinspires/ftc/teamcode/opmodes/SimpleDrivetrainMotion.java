@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -52,6 +53,7 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareEncoder;
  */
 
 @TeleOp(name="Simple Drivetrain Motion", group="TwoMotor")
+@Disabled
 public class SimpleDrivetrainMotion extends LinearOpMode {
 
     /* Declare OpMode members. */

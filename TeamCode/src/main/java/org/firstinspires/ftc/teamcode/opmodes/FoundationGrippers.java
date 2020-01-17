@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.disnodeteam.dogecv.detectors.skystone.SkystoneDetector;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,6 +27,7 @@ import java.util.HashMap;
  * drives in a DISTANCE-by-DISTANCE square indefinitely.
  */
 @Config
+@Disabled
 @Autonomous(group = "drive", name = "FoundationGrippers")
 public class FoundationGrippers extends LinearOpMode {
     private OpenCvInternalCamera phoneCam;

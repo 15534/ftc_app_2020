@@ -11,6 +11,7 @@ import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.disnodeteam.dogecv.detectors.skystone.SkystoneDetector;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -33,6 +34,7 @@ import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
  * drives in a DISTANCE-by-DISTANCE square indefinitely.
  */
 @Config
+@Disabled
 @Autonomous(group = "drive", name = "Foundation Autonomous")
 public class FoundationAuto extends LinearOpMode {
     HardwareDrivetrain robot = new HardwareDrivetrain();

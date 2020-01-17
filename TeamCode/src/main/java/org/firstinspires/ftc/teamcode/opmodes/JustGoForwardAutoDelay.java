@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -57,6 +58,7 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
  */
 
 @Autonomous(name="Just Go Forward with Delay")
+@Disabled
 public class JustGoForwardAutoDelay extends LinearOpMode {
 
     /* Declare OpMode members. */

@@ -29,7 +29,9 @@
 
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
@@ -51,7 +53,8 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="Servo Test", group="Competition")
+@TeleOp(name="Servo Test", group="Competition")
+@Disabled
 public class ServoTest extends LinearOpMode {
 
     /* Declare OpMode members. */

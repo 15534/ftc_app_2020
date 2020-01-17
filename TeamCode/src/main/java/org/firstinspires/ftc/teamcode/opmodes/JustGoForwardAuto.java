@@ -61,6 +61,7 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
  */
 
 @Autonomous(name="Just Go Forward")
+@Disabled
 public class JustGoForwardAuto extends LinearOpMode {
 
     /* Declare OpMode members. */

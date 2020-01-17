@@ -29,7 +29,9 @@
 
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
@@ -48,7 +50,8 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="Lift Test")
+@TeleOp(name="Lift Test")
+@Disabled
 public class LiftTest extends LinearOpMode {
 
     /* Declare OpMode members. */

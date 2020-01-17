@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -52,6 +53,7 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
  */
 
 @Config
+@Disabled
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="PID Lift Test")
 public class LiftPIDTest extends LinearOpMode {
 
