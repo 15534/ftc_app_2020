@@ -44,7 +44,7 @@ public class MainAuto extends LinearOpMode {
     enum State {
         INTAKE_OUT_AND_IN, RESET_SERVOS, STOP_INTAKE, START_INTAKE, REVERSE_INTAKE,
         DROP_GRIPPERS_HALFWAY, DROP_GRIPPERS_FULLY, LIFT_GRIPPERS, GO_TO_STACK_POSITION,
-        GO_TO_LIFT_POSITION
+        GO_TO_LIFT_POSITION, DROP_BLOCK
     }
     @Override
     public void runOpMode() throws InterruptedException {
@@ -60,6 +60,11 @@ public class MainAuto extends LinearOpMode {
 
         robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        robot.push_servo.setPosition(0.35);
+        robot.gripper_servo.setPosition(1);
+        robot.foundation_right.setPosition(0);
+        robot.foundation_left.setPosition(0);
 
         PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
         PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
@@ -148,24 +153,23 @@ public class MainAuto extends LinearOpMode {
                     .lineTo(new Vector2d(-2, -24), new SplineInterpolator(0, Math.toRadians(-45)))
                     .lineTo(new Vector2d(12, -32), new ConstantInterpolator(Math.toRadians(-45)))
                     .lineTo(new Vector2d(16, -35), new ConstantInterpolator(Math.toRadians(-45)))
-                    .lineTo(new Vector2d(25, -25), new LinearInterpolator(Math.toRadians(-45), Math.toRadians(-135)))
+                    .lineTo(new Vector2d(25, -23), new LinearInterpolator(Math.toRadians(-45), Math.toRadians(-135)))
                     .addMarker(() -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                         stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(70, -25), new ConstantInterpolator(Math.toRadians(-180)))
+                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(84, -28), new ConstantInterpolator(Math.toRadians(90)))
-                    .lineTo(new Vector2d(84, -32), new ConstantInterpolator(Math.toRadians(90)))
-                    .addMarker(new Vector2d(84, -34), () -> {
+                    .lineTo(new Vector2d(87, -32), new ConstantInterpolator(Math.toRadians(90)))
+                    .addMarker(new Vector2d(87, -34), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(84, -36), new ConstantInterpolator(Math.toRadians(90)))
+                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
                     .build();
         } else if (stonePosition == 1) {
             telemetry.addLine("CENTER");
@@ -179,24 +183,22 @@ public class MainAuto extends LinearOpMode {
                     .lineTo(new Vector2d(15, -26), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(15, -29.5), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(10.5, -34.5), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(24, -25.5), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+                    .lineTo(new Vector2d(24, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
-                        stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(70, -25), new ConstantInterpolator(Math.toRadians(-180)))
+                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(84, -28), new ConstantInterpolator(Math.toRadians(90)))
-                    .lineTo(new Vector2d(84, -32), new ConstantInterpolator(Math.toRadians(90)))
-                    .addMarker(new Vector2d(84, -34), () -> {
+                    .lineTo(new Vector2d(87, -32), new ConstantInterpolator(Math.toRadians(90)))
+                    .addMarker(new Vector2d(87, -34), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(84, -36), new ConstantInterpolator(Math.toRadians(90)))
+                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
                     .build();
 
         } else {
@@ -208,28 +210,30 @@ public class MainAuto extends LinearOpMode {
                     })
                     .lineTo(new Vector2d(11, -29), new SplineInterpolator(0, Math.toRadians(-135)))
                     .lineTo(new Vector2d(4, -33), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(22, -25), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+                    .lineTo(new Vector2d(22, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
-                        stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(70, -25), new ConstantInterpolator(Math.toRadians(-180)))
+                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(84, -28), new ConstantInterpolator(Math.toRadians(90)))
-                    .lineTo(new Vector2d(84, -32), new ConstantInterpolator(Math.toRadians(90)))
-                    .addMarker(new Vector2d(84, -34), () -> {
+                    .lineTo(new Vector2d(87, -32), new ConstantInterpolator(Math.toRadians(90)))
+                    .addMarker(new Vector2d(87, -34), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(84, -36), new ConstantInterpolator(Math.toRadians(90)))
+                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
                     .build();
         }
 
         drive.followTrajectory(trajectory);
+//        robot.foundation_right.setPosition(0.2);
+//        robot.foundation_left.setPosition(0.46);
+//        sleep(500);
+//        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
 
         while (opModeIsActive()) {
             drive.update();
@@ -256,7 +260,7 @@ public class MainAuto extends LinearOpMode {
                 if (elapsedTime < 500) {
                     robot.left_intake.setPower(-0.2);
                     robot.right_intake.setPower(-0.2);
-                } else if (elapsedTime < 1300) {
+                } else if (elapsedTime < 2000) {
                     robot.left_intake.setPower(0.6);
                     robot.right_intake.setPower(0.6);
                 } else {
@@ -300,8 +304,8 @@ public class MainAuto extends LinearOpMode {
                     robot.right_v4b.setPosition(0.6);
                     robot.push_servo.setPosition(0.35);
                     robot.gripper_servo.setPosition(1);
-                    robot.foundation_left.setPosition(0.1);
-                    robot.foundation_right.setPosition(0.1);
+                    robot.foundation_right.setPosition(0.2);
+                    robot.foundation_left.setPosition(0.46);
                 } else if (elapsedTime < 1000) {
                     robot.left_intake.setPower(0.8);
                     robot.right_intake.setPower(0.8);
@@ -313,38 +317,39 @@ public class MainAuto extends LinearOpMode {
                 }
             }
 
-            // drop grippers
-            if (stateTimes.containsKey(State.DROP_GRIPPERS_HALFWAY)) {
-                robot.foundation_left.setPosition(0.35);
-                robot.foundation_right.setPosition(0.35);
-                stateTimes.remove(State.DROP_GRIPPERS_HALFWAY);
-            }
-
             // drop grippers fully
             if (stateTimes.containsKey(State.DROP_GRIPPERS_FULLY)) {
                 robot.foundation_left.setPosition(1);
                 robot.foundation_right.setPosition(1);
                 drive.setMotorPowers(0,0,0,0);
                 sleep(1000);
+                stateTimes.remove(State.DROP_GRIPPERS_FULLY);
+
                 Trajectory trajectory2 = drive.trajectoryBuilder()
-                        .lineTo(new Vector2d(60, -19), new LinearInterpolator(Math.toRadians(90), Math.toRadians(90)))
+//                        .addMarker(() -> {
+//                            stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+//                            return null;
+//                        })
+                        .lineTo(new Vector2d(63, -19), new LinearInterpolator(Math.toRadians(90), Math.toRadians(90)))
                         .addMarker(() -> {
-                            robot.foundation_left.setPosition(0);
-                            robot.foundation_right.setPosition(0);
+                            stateTimes.put(State.LIFT_GRIPPERS, null);
                             return null;
                         })
-                        .lineTo(new Vector2d(55, -19), new ConstantInterpolator(Math.toRadians(180)))
+                        .lineTo(new Vector2d(58, -19), new ConstantInterpolator(Math.toRadians(180)))
                         .lineTo(new Vector2d(76, -19), new ConstantInterpolator(Math.toRadians(180)))
-                        .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
-                        .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
+//                        .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
+//                        .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
+                        .addMarker(() -> {
+                            stateTimes.put(State.GO_TO_STACK_POSITION, null);
+                            return null;
+                        })
                         .build();
-                drive.followTrajectorySync(trajectory2);
-                stateTimes.remove(State.DROP_GRIPPERS_FULLY);
+                drive.followTrajectory(trajectory2);
             }
 
             if (stateTimes.containsKey(State.LIFT_GRIPPERS)) {
-                robot.foundation_left.setPosition(0.1);
-                robot.foundation_right.setPosition(0.1);
+                robot.foundation_right.setPosition(0.2);
+                robot.foundation_left.setPosition(0.46);
                 stateTimes.remove(State.LIFT_GRIPPERS);
             }
 
@@ -357,17 +362,44 @@ public class MainAuto extends LinearOpMode {
                 }
 
                 if (elapsedTime < 300) {
+                    robot.push_servo.setPosition(1);
+                } else if (elapsedTime < 600) {
                     robot.push_servo.setPosition(0.35);
                     robot.gripper_servo.setPosition(1);
-                } else if (elapsedTime < 600) {
-                    robot.push_servo.setPosition(1);
                 } else if (elapsedTime < 900) {
+                    robot.push_servo.setPosition(1);
+                } else if (elapsedTime < 1200) {
                     robot.left_v4b.setPosition(0.75);
                     robot.right_v4b.setPosition(0.75);
-                } else if (elapsedTime < 1200) {
+                } else if (elapsedTime < 1500) {
                     robot.gripper_servo.setPosition(0.6);
                 } else {
                     stateTimes.remove(State.GO_TO_STACK_POSITION);
+                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+                }
+            }
+
+            if (stateTimes.containsKey(State.DROP_BLOCK)) {
+                // initialize servos
+                Double startTime = stateTimes.get(State.DROP_BLOCK);
+                double elapsedTime = 0;
+                if (startTime != null) {
+                    elapsedTime = timer.milliseconds() - startTime;
+                }
+
+                if (elapsedTime < 300) {
+                    robot.left_v4b.setPosition(0);
+                    robot.right_v4b.setPosition(0);
+                } else if (elapsedTime < 700) {
+                    robot.gripper_servo.setPosition(1);
+                } else if (elapsedTime < 1300) {
+                    target = 0;
+                    stateTimes.remove(State.DROP_BLOCK);
+                    Trajectory trajectory2 = drive.trajectoryBuilder()
+                        .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
+                        .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
+                        .build();
+                    drive.followTrajectory(trajectory2);
                 }
             }
 
@@ -381,11 +413,13 @@ public class MainAuto extends LinearOpMode {
 
                 if (elapsedTime < 300) {
                     // get pusher out of the way
+                    robot.gripper_servo.setPosition(0.6);
                     robot.push_servo.setPosition(0.35);
                 } else if (elapsedTime < 500){
                     target = -100;
                 } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) < 5) {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);
+                    stateTimes.put(State.DROP_BLOCK, null);
                 }
             }
 

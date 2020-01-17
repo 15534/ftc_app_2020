@@ -109,6 +109,8 @@ public class TeleOp extends LinearOpMode {
         robot.right_v4b.setPosition(0.6);
         robot.push_servo.setPosition(0.35);
         robot.gripper_servo.setPosition(1);
+        robot.foundation_right.setPosition(0.2);
+        robot.foundation_left.setPosition(0.46);
 
         // lift PID controller
         controller.setTargetPosition(0);
@@ -548,8 +550,8 @@ public class TeleOp extends LinearOpMode {
                 robot.foundation_right.setPosition(1);
             } else if (gamepad2.left_stick_y > 0.05) {
                 // up
-                robot.foundation_left.setPosition(0.1);
-                robot.foundation_right.setPosition(0.1);
+                robot.foundation_left.setPosition(0.25);
+                robot.foundation_right.setPosition(0.25);
             }
 
             // set motor powers
