@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.NewStoneDetector;
 import org.firstinspires.ftc.teamcode.drive.mecanum.VertexDrive;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -36,7 +37,7 @@ import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
 @Autonomous(group = "drive", name = "Blue Auto")
 public class BlueAuto extends LinearOpMode {
     private OpenCvInternalCamera phoneCam;
-    private SkystoneDetector skyStoneDetector;
+    private NewStoneDetector skyStoneDetector;
 
     HardwareDrivetrain robot = new HardwareDrivetrain();
 
@@ -77,7 +78,7 @@ public class BlueAuto extends LinearOpMode {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         phoneCam.openCameraDevice();
-        skyStoneDetector = new SkystoneDetector();
+        skyStoneDetector = new NewStoneDetector(false);
         phoneCam.setPipeline(skyStoneDetector);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
         double xPosition;
@@ -110,23 +111,14 @@ public class BlueAuto extends LinearOpMode {
 
             telemetry.addData("EXPOSURE COMPENSATION", exposureCompensation);
 
-            xPosition = skyStoneDetector.getScreenPosition().x;
-            if (xPosition < 1) {
-                // do nothing
-            } else if (xPosition < 15) {
-                stonePosition = 0;
+            stonePosition = skyStoneDetector.position;
+            if (stonePosition == 0) {
                 telemetry.addData("position", "front");
-            } else if (xPosition < 75) {
-                stonePosition = 2;
-                telemetry.addData("position", "back");
-            } else if (xPosition < 130) {
-                stonePosition = 1;
+            } else if (stonePosition == 1) {
                 telemetry.addData("position", "center");
-            } else if (xPosition < 230) {
-                stonePosition = 0;
-                telemetry.addData("position", "front");
+            } else if (stonePosition == 2) {
+                telemetry.addData("position", "back");
             }
-            telemetry.addData("xPosition", xPosition);
             telemetry.update();
         }
 
@@ -207,8 +199,8 @@ public class BlueAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(11, -29), new SplineInterpolator(0, Math.toRadians(-135)))
-                    .lineTo(new Vector2d(4, -33), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(11, -31), new SplineInterpolator(0, Math.toRadians(-135)))
+                    .lineTo(new Vector2d(4, -35), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(22, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
