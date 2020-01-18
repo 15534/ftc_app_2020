@@ -170,9 +170,9 @@ public class BlueAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(10, -26), new SplineInterpolator(0, Math.toRadians(-135)))
-                    .lineTo(new Vector2d(15, -26), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(15, -29.5), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(10, -27), new SplineInterpolator(0, Math.toRadians(-135)))
+                    .lineTo(new Vector2d(15, -27), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(15, -30), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(10.5, -34.5), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(24, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
                     .addMarker(() -> {
@@ -368,7 +368,7 @@ public class BlueAuto extends LinearOpMode {
                     robot.left_v4b.setPosition(0.75);
                     robot.right_v4b.setPosition(0.75);
                 } else if (elapsedTime < 1500) {
-                    robot.gripper_servo.setPosition(0.6);
+                    robot.gripper_servo.setPosition(0.4);
                 } else {
                     stateTimes.remove(State.GO_TO_STACK_POSITION);
 //                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
@@ -421,7 +421,7 @@ public class BlueAuto extends LinearOpMode {
 
                 if (elapsedTime < 300) {
                     // get pusher out of the way
-                    robot.gripper_servo.setPosition(0.6);
+                    robot.gripper_servo.setPosition(0.4);
                     robot.push_servo.setPosition(0.35);
                 } else if (elapsedTime < 500){
                     target = -100;

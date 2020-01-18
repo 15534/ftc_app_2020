@@ -316,7 +316,7 @@ public class TeleOp extends LinearOpMode {
                     robot.left_v4b.setPosition(0.75);
                     robot.right_v4b.setPosition(0.75);
                 } else if (stack_routine_time.milliseconds() < 1800) {
-                    robot.gripper_servo.setPosition(0.6);
+                    robot.gripper_servo.setPosition(0.4);
                     intakeSpeed = 0;
                     lastIntakeButton = "stop";
                 }  else {
