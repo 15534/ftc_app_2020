@@ -81,6 +81,9 @@ public class TeleOp extends LinearOpMode {
     private boolean gamepad2XYPressed = false;
     private boolean gamepad1YPressed = false;
     private boolean gamepad2RightButtonPressed = false;
+    private boolean capPosition = false;
+
+    ElapsedTime lagTimer = new ElapsedTime();
 
     @Override
     public void runOpMode() {
@@ -128,6 +131,8 @@ public class TeleOp extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            telemetry.addData("lag (ms)", lagTimer.milliseconds());
+            lagTimer.reset();
 
             // initialize all speeds to 0
             leftBackSpeed = leftFrontSpeed = rightBackSpeed = rightFrontSpeed = 0;
@@ -340,13 +345,13 @@ public class TeleOp extends LinearOpMode {
                     // do nothing
                 } else {
                     // extend v4b servos to drop position
-                    if (desiredLiftPosition < 8) {
+                    if (capPosition) {
+                        // capstone level
+                        robot.left_v4b.setPosition(0.5);
+                        robot.right_v4b.setPosition(0.5);
+                    } else {
                         robot.left_v4b.setPosition(0);
                         robot.right_v4b.setPosition(0);
-                    } else {
-                        // capstone level
-                        robot.left_v4b.setPosition(0.15);
-                        robot.right_v4b.setPosition(0.15);
                     }
                     if (desiredLiftPosition < 8) {
                         desiredLiftPosition++;
@@ -356,34 +361,29 @@ public class TeleOp extends LinearOpMode {
             }
 
             // gluten cycle
-            if (gluten_routine_time == null && gamepad2.dpad_left) {
-                gluten_routine_time = new ElapsedTime();
-            }
-            if (gluten_routine_time != null) {
-                if (gluten_routine_time.milliseconds() < 300) {
-                    // get pusher out of the way
-                    robot.push_servo.setPosition(0.35);
-                } else if (gluten_routine_time.milliseconds() < 600) {
-                    // drop v4b
-                    robot.left_v4b.setPosition(0);
-                    robot.right_v4b.setPosition(0);
-                } else if (gluten_routine_time.milliseconds() < 900) {
-                    // release the gripper
-                    robot.gripper_servo.setPosition(1);
-                    goneUp = false;
-                } else if (gluten_routine_time.milliseconds() < 1000) {
-                    if (!goneUp) {
-                        target = -50;
-                        goneUp = true;
-                    }
-                } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) > 5) {
-                    // we're still far away from the target
-                    // do nothing
-                } else {
-                    // start new routine timer
-                    drop_routine_2_time = new ElapsedTime();
-                    gluten_routine_time = null;
-                }
+//            if (gluten_routine_time == null && gamepad2.dpad_left) {
+//                gluten_routine_time = new ElapsedTime();
+//            }
+//            if (gluten_routine_time != null) {
+//                if (gluten_routine_time.milliseconds() < 300) {
+//                    // get pusher out of the way
+//                    robot.push_servo.setPosition(0.35);
+//                } else if (gluten_routine_time.milliseconds() < 600) {
+//                    target = -75;
+//                } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) < 5) {
+//                    // drop v4b
+//                    robot.left_v4b.setPosition(0);
+//                    robot.right_v4b.setPosition(0);
+//                    sleep(200);
+//                    robot.gripper_servo.setPosition(1);
+//                    sleep(200);
+//                    drop_routine_2_time = new ElapsedTime();
+//                    gluten_routine_time = null;
+//                }
+//            }
+            if (gamepad2.dpad_left && lift_routine_time == null) {
+                desiredLiftPosition = 0;
+                lift_routine_time = new ElapsedTime();
             }
 
             // drop routine
@@ -437,64 +437,6 @@ public class TeleOp extends LinearOpMode {
                 }
             }
 
-//            // drop routine routine
-//
-//            if (drop_routine_time == null && gamepad2.dpad_down) {
-//                drop_routine_time = new ElapsedTime();
-//            }
-//            if (drop_routine_time != null) {
-//                if (drop_routine_time.milliseconds() < 500) {
-//                    robot.gripper_servo.setPosition(1);
-//                } else if (drop_routine_time.milliseconds() < 1000) {
-//                    robot.left_v4b.setPosition(0.5);
-//                    robot.right_v4b.setPosition(0.5);
-//                } else if (drop_routine_time.milliseconds() < 1500) {
-//                    robot.push_servo.setPosition(0.3);
-//                } else if (drop_routine_time.milliseconds() < 2000) {
-//                    robot.left_v4b.setPosition(0.6);
-//                    robot.right_v4b.setPosition(0.6);
-//                    intakeSpeed = 0.6;
-//                    lastIntakeButton = "on";
-//                } else {
-//                    drop_routine_time = null;
-//                }
-//            }
-
-//            // gf drop routine
-//            if (gf_drop_routine_time == null && gamepad2.dpad_right) {
-//                gf_drop_routine_time = new ElapsedTime();
-//            }
-//            if (gf_drop_routine_time != null) {
-//                if (gf_drop_routine_time.milliseconds() < 300) {
-//                    robot.push_servo.setPosition(0.35);
-//                    robot.gripper_servo.setPosition(1);
-//                } else if (gf_drop_routine_time.milliseconds() < 600) {
-//                    robot.push_servo.setPosition(1);
-//                } else if (gf_drop_routine_time.milliseconds() < 900) {
-//                    robot.left_v4b.setPosition(0.75);
-//                    robot.right_v4b.setPosition(0.75);
-//                } else if (gf_drop_routine_time.milliseconds() < 1200) {
-//                    robot.gripper_servo.setPosition(0.6);
-//                } else if (gf_drop_routine_time.milliseconds() < 1500) {
-//                    robot.left_v4b.setPosition(0);
-//                    robot.right_v4b.setPosition(0);
-//                } else if (gf_drop_routine_time.milliseconds() < 1800) {
-//                    robot.gripper_servo.setPosition(1);
-//                } else if (gf_drop_routine_time.milliseconds() < 2100) {
-//                    robot.left_v4b.setPosition(0.5);
-//                    robot.right_v4b.setPosition(0.5);
-//                } else if (gf_drop_routine_time.milliseconds() < 3000) {
-//                    robot.push_servo.setPosition(0.3);
-//                } else if (gf_drop_routine_time.milliseconds() < 3500) {
-//                    robot.left_v4b.setPosition(0.6);
-//                    robot.right_v4b.setPosition(0.6);
-//                    intakeSpeed = 0.6;
-//                    lastIntakeButton = "a";
-//                } else {
-//                    gf_drop_routine_time = null;
-//                }
-//            }
-
             // left joystick - control pusher
             if (gamepad2.right_stick_y > 0.1) {
                 double pusherPosition = 0.7 * gamepad2.right_stick_y + 0.3;
@@ -503,6 +445,15 @@ public class TeleOp extends LinearOpMode {
             if (gamepad2.right_stick_y < -0.1) {
                 double pusherPosition = 1- (0.7 * (-gamepad2.right_stick_y) + 0.3);
                 robot.push_servo.setPosition(pusherPosition);
+            }
+
+            //
+            if (gamepad2.right_stick_button && !gamepad2RightButtonPressed) {
+                gamepad2RightButtonPressed = true;
+                capPosition = !capPosition;
+
+            } else if (!gamepad2.right_stick_button) {
+                gamepad2RightButtonPressed = false;
             }
 
             // emergency re-initialization
@@ -515,6 +466,9 @@ public class TeleOp extends LinearOpMode {
                 robot.gripper_servo.setPosition(1);
             }
 
+            if (capPosition) {
+                telemetry.addLine("CAP");
+            }
 
             double lift_position = robot.lift_left.getCurrentPosition();
 
