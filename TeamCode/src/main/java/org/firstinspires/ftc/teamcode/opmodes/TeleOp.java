@@ -2,15 +2,23 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
+import com.acmerobotics.roadrunner.drive.Drive;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.path.heading.LinearInterpolator;
+import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
+import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.drive.mecanum.VertexDrive;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
 import org.firstinspires.ftc.teamcode.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
 
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TELE_OP_CONSTRAINTS;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_i;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
@@ -35,6 +43,7 @@ public class TeleOp extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareDrivetrain robot = new HardwareDrivetrain();
+
     private double THRESHOLD = 0.05;
     ElapsedTime accel = new ElapsedTime();
     ElapsedTime rotate_accel = new ElapsedTime();
@@ -91,6 +100,9 @@ public class TeleOp extends LinearOpMode {
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
          */
+        VertexDrive drive = new VertexDrive(hardwareMap);
+
+        drive.setPoseEstimate(new Pose2d(11.5, -26.6, Math.toRadians(180)));
         robot.init(hardwareMap);
 
         // reset lift encoders
@@ -125,6 +137,12 @@ public class TeleOp extends LinearOpMode {
 
         // extra vars
         boolean goneUp = false;
+        boolean autoDriving = false;
+        boolean gamepad1LeftStickButtonPressed = false;
+        boolean gamepad1RightStickButtonPressed = false;
+
+        // set drive contraints
+        drive.setConstraints(TELE_OP_CONSTRAINTS);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -234,6 +252,51 @@ public class TeleOp extends LinearOpMode {
                 dpad_accel.reset();
             }
 
+            // auto drive controls
+            if (gamepad1.left_stick_button && !gamepad1LeftStickButtonPressed) {
+                gamepad1LeftStickButtonPressed = true;
+
+                // to depot
+                if (autoDriving) {
+                    // stop auto-driving
+                    drive.followTrajectory(drive.trajectoryBuilder().build());
+                    autoDriving = false;
+                } else {
+                    // start auto-driving
+                    drive.followTrajectory(drive.trajectoryBuilder()
+                            .lineTo(new Vector2d(45, 70), new SplineInterpolator(drive.getRawExternalHeading(),
+                                    Math.toRadians(90)))
+                            .build());
+                    autoDriving = true;
+                }
+
+            } else if (!gamepad1.left_stick_button) {
+                gamepad1LeftStickButtonPressed = false;
+            }
+
+            // auto drive controls
+            if (gamepad1.right_stick_button && !gamepad1RightStickButtonPressed) {
+                gamepad1RightStickButtonPressed = true;
+
+                // to depot
+                if (autoDriving) {
+                    // stop auto-driving
+                    drive.followTrajectory(drive.trajectoryBuilder().build());
+                    autoDriving = false;
+                } else {
+                    // start auto-driving
+                    drive.followTrajectory(drive.trajectoryBuilder()
+                            .lineTo(new Vector2d(16, -14), new SplineInterpolator(drive.getRawExternalHeading(),
+                                    Math.toRadians(180)))
+                            .build());
+                    autoDriving = true;
+                }
+
+            } else if (!gamepad1.right_stick_button) {
+                gamepad1RightStickButtonPressed = false;
+            }
+
+
             // intake/outtake
             if (gamepad1.a || gamepad2.a) {
                 // intake
@@ -247,7 +310,7 @@ public class TeleOp extends LinearOpMode {
                 // intake fast
                 intakeSpeed = 1;
                 lastIntakeButton = "temp";
-            } else if (gamepad1.x || lastIntakeButton.equals("temp")) {
+            } else if (lastIntakeButton.equals("temp")) {
                 // stop intake
                 intakeSpeed = 0;
                 lastIntakeButton = "stop";
@@ -268,8 +331,8 @@ public class TeleOp extends LinearOpMode {
             }
 
             // reset orientation
-            if (gamepad1.y) {
-                globalPositionUpdate.setOrientation(0);
+            if (gamepad1.x) {
+                drive.setPoseEstimate(new Pose2d(10.42, -25.68, Math.toRadians(180)));
             }
 
             // gamepad 2
@@ -530,10 +593,27 @@ public class TeleOp extends LinearOpMode {
             }
 
             // set motor powers
-            robot.left_back.setPower(leftBackSpeed);
-            robot.left_front.setPower(leftFrontSpeed);
-            robot.right_back.setPower(rightBackSpeed);
-            robot.right_front.setPower(rightFrontSpeed);
+//            robot.left_back.setPower(leftBackSpeed);
+//            robot.left_front.setPower(leftFrontSpeed);
+//            robot.right_back.setPower(rightBackSpeed);
+//            robot.right_front.setPower(rightFrontSpeed);
+
+            if (!drive.isBusy()) {
+                autoDriving = false;
+            }
+
+            if ((leftFrontSpeed != 0 || leftBackSpeed != 0 || rightBackSpeed != 0 || rightFrontSpeed != 0) && autoDriving) {
+                drive.followTrajectory(drive.trajectoryBuilder().build());
+                autoDriving = false;
+            }
+
+            if (!autoDriving) {
+                drive.setMotorPowers(leftFrontSpeed, leftBackSpeed, rightBackSpeed, rightFrontSpeed);
+            } else {
+                telemetry.addLine("AUTO-DRIVING");
+            }
+
+            drive.update();
 
             robot.right_intake.setPower(intakeSpeed);
             robot.left_intake.setPower(intakeSpeed);

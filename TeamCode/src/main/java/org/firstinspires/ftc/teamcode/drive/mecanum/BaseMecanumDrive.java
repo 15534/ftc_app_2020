@@ -12,6 +12,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
+import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
@@ -234,4 +235,8 @@ public abstract class BaseMecanumDrive extends MecanumDrive {
     public abstract PIDCoefficients getPIDCoefficients(DcMotor.RunMode runMode);
 
     public abstract void setPIDCoefficients(DcMotor.RunMode runMode, PIDCoefficients coefficients);
+
+    public void setConstraints(DriveConstraints driveConstraints) {
+        this.constraints = new MecanumConstraints(driveConstraints, TRACK_WIDTH);
+    }
 }

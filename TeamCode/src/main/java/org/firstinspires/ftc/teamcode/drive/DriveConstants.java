@@ -76,6 +76,11 @@ public class DriveConstants {
             Math.toRadians(180.0), Math.toRadians(180.0), 0.0
     );
 
+    public static DriveConstraints TELE_OP_CONSTRAINTS = new DriveConstraints(
+            80, 40, 0,
+            Math.toRadians(360), Math.toRadians(180.0), 0.0
+    );
+
 
     public static double encoderTicksToInches(double ticks) {
         return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / MOTOR_CONFIG.getTicksPerRev();
