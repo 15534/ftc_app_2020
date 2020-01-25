@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.NewStoneDetector;
 import org.firstinspires.ftc.teamcode.drive.mecanum.VertexDrive;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
@@ -22,6 +23,9 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_G;
@@ -53,6 +57,16 @@ public class RedAuto extends LinearOpMode {
 
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(180)));
         robot.init(hardwareMap);
+
+        // save last auto in file
+        String fname = AppUtil.ROOT_FOLDER + "/lastAuto.txt";
+        try {
+            BufferedWriter br = new BufferedWriter(new FileWriter(fname));
+            br.write("Red");
+            br.close();
+        } catch (IOException exception) {
+
+        }
 
         // reset lift encoders
         robot.lift_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -140,8 +154,9 @@ public class RedAuto extends LinearOpMode {
                         return null;
                     })
                     .lineTo(new Vector2d(0, 6), new ConstantInterpolator(Math.toRadians(180)))
-                    .lineTo(new Vector2d(-8, 30), new LinearInterpolator(Math.toRadians(180), Math.toRadians(-135)))
-                    .lineTo(new Vector2d(0, 38), new ConstantInterpolator(Math.toRadians(45)))
+                    .lineTo(new Vector2d(-8, 27), new LinearInterpolator(Math.toRadians(180), Math.toRadians(-135)))
+                    .lineTo(new Vector2d(-3, 32), new ConstantInterpolator(Math.toRadians(45)))
+//                    .lineTo(new Vector2d(-8, 27), new ConstantInterpolator(Math.toRadians(45)))
                     .lineTo(new Vector2d(12, 26), new LinearInterpolator(Math.toRadians(45), Math.toRadians(135)))
                     .addMarker(() -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
@@ -158,12 +173,12 @@ public class RedAuto extends LinearOpMode {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(94, 28), new ConstantInterpolator(Math.toRadians(-90)))
-                    .addMarker(new Vector2d(94, 32), () -> {
+                    .lineTo(new Vector2d(86, 28), new ConstantInterpolator(Math.toRadians(-90)))
+                    .addMarker(new Vector2d(86, 32), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(94, 34), new ConstantInterpolator(Math.toRadians(-90)))
+                    .lineTo(new Vector2d(86, 34), new ConstantInterpolator(Math.toRadians(-90)))
                     .build();
         } else if (stonePosition == 1) {
             telemetry.addLine("CENTER");
@@ -174,8 +189,8 @@ public class RedAuto extends LinearOpMode {
                         return null;
                     })
                     .lineTo(new Vector2d(0, 6), new ConstantInterpolator(Math.toRadians(180)))
-                    .lineTo(new Vector2d(8, 34), new SplineInterpolator(Math.toRadians(180), Math.toRadians(135)))
-                    .lineTo(new Vector2d(2, 28), new ConstantInterpolator(Math.toRadians(135)))
+                    .lineTo(new Vector2d(12, 24), new SplineInterpolator(Math.toRadians(180), Math.toRadians(135)))
+                    .lineTo(new Vector2d(4, 34), new ConstantInterpolator(Math.toRadians(135)))
                     .lineTo(new Vector2d(12, 26), new SplineInterpolator(Math.toRadians(135), Math.toRadians(180)))
                     .addMarker(new Vector2d(30, 26), () -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
@@ -187,12 +202,14 @@ public class RedAuto extends LinearOpMode {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(94, 28), new ConstantInterpolator(Math.toRadians(-90)))
-                    .addMarker(new Vector2d(94, 32), () -> {
+                    // TODO add to
+                    .lineTo(new Vector2d(86, 30), new ConstantInterpolator(Math.toRadians(-90)))
+                    .lineTo(new Vector2d(86, 34), new ConstantInterpolator(Math.toRadians(-90)))
+                    .addMarker(new Vector2d(86, 37), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(94, 34), new ConstantInterpolator(Math.toRadians(-90)))
+                    .lineTo(new Vector2d(86, 40), new ConstantInterpolator(Math.toRadians(-90)))
                     .build();
         } else {
             telemetry.addLine("BACK"); telemetry.update();
@@ -201,10 +218,10 @@ public class RedAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(0, 6), new ConstantInterpolator(Math.toRadians(180)))
-                    .lineTo(new Vector2d(0, 32), new SplineInterpolator(Math.toRadians(180), Math.toRadians(135)))
-                    .lineTo(new Vector2d(-2, 34), new ConstantInterpolator(Math.toRadians(135)))
-                    .lineTo(new Vector2d(12, 26), new SplineInterpolator(Math.toRadians(135), Math.toRadians(180)))
+                    .lineTo(new Vector2d(-8, 6), new ConstantInterpolator(Math.toRadians(180)))
+                    .lineTo(new Vector2d(4, 24), new SplineInterpolator(Math.toRadians(180), Math.toRadians(135)))
+                    .lineTo(new Vector2d(-4, 34), new ConstantInterpolator(Math.toRadians(135)))
+                    .lineTo(new Vector2d(4, 26), new SplineInterpolator(Math.toRadians(135), Math.toRadians(180)))
                     .addMarker(new Vector2d(30, 26), () -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                         return null;
@@ -215,19 +232,17 @@ public class RedAuto extends LinearOpMode {
                         stateTimes.put(State.STOP_INTAKE, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(94, 28), new ConstantInterpolator(Math.toRadians(-90)))
-                    .addMarker(new Vector2d(94, 32), () -> {
+                    // TODO add to
+                    .lineTo(new Vector2d(82, 26), new ConstantInterpolator(Math.toRadians(-90)))
+//                    .lineTo(new Vector2d(82, 34), new ConstantInterpolator(Math.toRadians(-90)))
+                    .addMarker(new Vector2d(82, 37), () -> {
                         stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
                         return null; // go to stack pos
                     })
-                    .lineTo(new Vector2d(94, 34), new ConstantInterpolator(Math.toRadians(-90)))
-                    .build();        }
+                    .lineTo(new Vector2d(82, 40), new ConstantInterpolator(Math.toRadians(-90)))
+                    .build();   }
 
         drive.followTrajectory(trajectory);
-//        robot.foundation_right.setPosition(0.2);
-//        robot.foundation_left.setPosition(0.46);
-//        sleep(500);
-//        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
 
         while (opModeIsActive()) {
             drive.update();
@@ -254,12 +269,15 @@ public class RedAuto extends LinearOpMode {
                 if (elapsedTime < 500) {
                     robot.left_intake.setPower(-0.2);
                     robot.right_intake.setPower(-0.2);
+                    robot.intake_wheel.setPower(-1);
                 } else if (elapsedTime < 2000) {
                     robot.left_intake.setPower(0.6);
                     robot.right_intake.setPower(0.6);
+                    robot.intake_wheel.setPower(1);
                 } else {
                     robot.left_intake.setPower(0);
                     robot.right_intake.setPower(0);
+                    robot.intake_wheel.setPower(0);
                     stateTimes.remove(State.INTAKE_OUT_AND_IN);
                 }
             }
@@ -268,16 +286,19 @@ public class RedAuto extends LinearOpMode {
             if (stateTimes.containsKey(State.START_INTAKE)) {
                 robot.left_intake.setPower(0.6);
                 robot.right_intake.setPower(0.6);
+                robot.intake_wheel.setPower(1);
                 telemetry.addData("START_INTAKE", 0);
                 stateTimes.remove(State.START_INTAKE);
             } else if (stateTimes.containsKey(State.STOP_INTAKE)) {
                 robot.left_intake.setPower(0);
                 robot.right_intake.setPower(0);
+                robot.intake_wheel.setPower(0);
                 telemetry.addData("STOP_INTAKE", 0);
                 stateTimes.remove(State.STOP_INTAKE);
             } else if (stateTimes.containsKey(State.REVERSE_INTAKE)) {
                 robot.left_intake.setPower(-0.6);
                 robot.right_intake.setPower(-0.6);
+                robot.intake_wheel.setPower(-1);
                 telemetry.addData("REVERSE_INTAKE", 0);
                 stateTimes.remove(State.REVERSE_INTAKE);
             }
@@ -299,7 +320,7 @@ public class RedAuto extends LinearOpMode {
                     robot.push_servo.setPosition(0);
                     robot.gripper_servo.setPosition(1);
                     robot.foundation_right.setPosition(0.2);
-                    robot.foundation_left.setPosition(0.46);
+                    robot.foundation_left.setPosition(0.4);
                 } else if (elapsedTime < 1000) {
                     robot.left_intake.setPower(0.8);
                     robot.right_intake.setPower(0.8);
@@ -307,6 +328,7 @@ public class RedAuto extends LinearOpMode {
                     // start intake
                     robot.left_intake.setPower(0.6);
                     robot.right_intake.setPower(0.6);
+                    robot.intake_wheel.setPower(1);
                     robot.push_servo.setPosition(0.35);
                     stateTimes.remove(State.RESET_SERVOS);
                 }
@@ -342,7 +364,7 @@ public class RedAuto extends LinearOpMode {
 
             if (stateTimes.containsKey(State.LIFT_GRIPPERS)) {
                 robot.foundation_right.setPosition(0.2);
-                robot.foundation_left.setPosition(0.46);
+                robot.foundation_left.setPosition(0.4);
                 stateTimes.remove(State.LIFT_GRIPPERS);
             }
 

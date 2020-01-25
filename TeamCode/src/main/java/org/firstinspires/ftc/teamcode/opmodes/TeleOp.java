@@ -12,11 +12,18 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.drive.mecanum.VertexDrive;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.firstinspires.ftc.teamcode.hardware.HardwareNames;
 import org.firstinspires.ftc.teamcode.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TELE_OP_CONSTRAINTS;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
@@ -91,6 +98,7 @@ public class TeleOp extends LinearOpMode {
     private boolean gamepad1YPressed = false;
     private boolean gamepad2RightButtonPressed = false;
     private boolean capPosition = false;
+    private boolean blue = false;
 
     ElapsedTime lagTimer = new ElapsedTime();
 
@@ -102,7 +110,6 @@ public class TeleOp extends LinearOpMode {
          */
         VertexDrive drive = new VertexDrive(hardwareMap);
 
-        drive.setPoseEstimate(new Pose2d(11.5, -26.6, Math.toRadians(180)));
         robot.init(hardwareMap);
 
         // reset lift encoders
@@ -129,7 +136,26 @@ public class TeleOp extends LinearOpMode {
         robot.push_servo.setPosition(0.35);
         robot.gripper_servo.setPosition(lastGripperPosition);
         robot.foundation_right.setPosition(0.2);
-        robot.foundation_left.setPosition(0.46);
+        robot.foundation_left.setPosition(0.4);
+
+        // save last auto in file
+        String fname = AppUtil.ROOT_FOLDER + "/lastAuto.txt";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(fname));
+            String line = br.readLine();
+            if (line.startsWith("Blue")) {
+                blue = true;
+            }
+            br.close();
+        } catch (IOException exception) {
+
+        }
+
+        if (blue) {
+            drive.setPoseEstimate(new Pose2d(11.5, -26.6, Math.toRadians(180)));
+        } else {
+            drive.setPoseEstimate(new Pose2d(11.5, 26.6, Math.toRadians(180)));
+        }
 
         // lift PID controller
         controller.setTargetPosition(0);
@@ -263,10 +289,19 @@ public class TeleOp extends LinearOpMode {
                     autoDriving = false;
                 } else {
                     // start auto-driving
-                    drive.followTrajectory(drive.trajectoryBuilder()
-                            .lineTo(new Vector2d(45, 70), new SplineInterpolator(drive.getRawExternalHeading(),
-                                    Math.toRadians(90)))
-                            .build());
+                    if (blue) {
+                        drive.followTrajectory(drive.trajectoryBuilder()
+//                            .lineTo(new Vector2d(45, 70), new SplineInterpolator(drive.getRawExternalHeading(),
+//                                    Math.toRadians(90)))
+                                .splineTo(new Pose2d(45, 70, Math.toRadians(90)))
+                                .build());
+                    } else {
+                        drive.followTrajectory(drive.trajectoryBuilder()
+//                            .lineTo(new Vector2d(45, 70), new SplineInterpolator(drive.getRawExternalHeading(),
+//                                    Math.toRadians(90)))
+                                .splineTo(new Pose2d(45, -70, Math.toRadians(-90)))
+                                .build());
+                    }
                     autoDriving = true;
                 }
 
@@ -284,11 +319,21 @@ public class TeleOp extends LinearOpMode {
                     drive.followTrajectory(drive.trajectoryBuilder().build());
                     autoDriving = false;
                 } else {
+                    if (blue) {
+                        drive.followTrajectory(drive.trajectoryBuilder()
+//                                .lineTo(new Vector2d(16, -14), new SplineInterpolator(drive.getRawExternalHeading(),
+//                                        Math.toRadians(180)))
+                                .splineTo(new Pose2d(16, -14, Math.toRadians(180)))
+                                .build());
+                    } else {
+                        drive.followTrajectory(drive.trajectoryBuilder()
+//                                .lineTo(new Vector2d(16, 14), new SplineInterpolator(drive.getRawExternalHeading(),
+//                                        Math.toRadians(180)))
+                                .splineTo(new Pose2d(16, 14, Math.toRadians(180)))
+                                .build());
+                    }
                     // start auto-driving
-                    drive.followTrajectory(drive.trajectoryBuilder()
-                            .lineTo(new Vector2d(16, -14), new SplineInterpolator(drive.getRawExternalHeading(),
-                                    Math.toRadians(180)))
-                            .build());
+
                     autoDriving = true;
                 }
 
@@ -589,7 +634,7 @@ public class TeleOp extends LinearOpMode {
             } else if (gamepad2.left_stick_y < -0.05) {
                 // up
                 robot.foundation_right.setPosition(0.2);
-                robot.foundation_left.setPosition(0.46);
+                robot.foundation_left.setPosition(0.4);
             }
 
             // set motor powers
@@ -623,6 +668,12 @@ public class TeleOp extends LinearOpMode {
                 robot.intake_wheel.setPower(1);
             } else {
                 robot.intake_wheel.setPower(-1);
+            }
+
+            if(blue) {
+                telemetry.addLine("Blue");
+            } else {
+                telemetry.addLine("Red");
             }
 
             // update telemetry

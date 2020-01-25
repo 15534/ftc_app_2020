@@ -15,15 +15,17 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.NewStoneDetector;
 import org.firstinspires.ftc.teamcode.drive.mecanum.VertexDrive;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
-
+import java.io.*;
 import java.util.HashMap;
 
+import static org.firstinspires.ftc.robotcore.internal.system.AppUtil.ROOT_FOLDER;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_G;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_i;
@@ -53,6 +55,16 @@ public class BlueAuto extends LinearOpMode {
 
         drive.setPoseEstimate(new Pose2d(0, 0, 0));
         robot.init(hardwareMap);
+
+        // save last auto in file
+        String fname = AppUtil.ROOT_FOLDER + "/lastAuto.txt";
+        try {
+            BufferedWriter br = new BufferedWriter(new FileWriter(fname));
+            br.write("Blue");
+            br.close();
+        } catch (IOException exception) {
+
+        }
 
         // reset lift encoders
         robot.lift_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -170,11 +182,11 @@ public class BlueAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(10, -27), new SplineInterpolator(0, Math.toRadians(-135)))
-                    .lineTo(new Vector2d(15, -27), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(15, -30), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(10.5, -34.5), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(24, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+                    .lineTo(new Vector2d(17.5, -27), new SplineInterpolator(0, Math.toRadians(-135)))
+//                    .lineTo(new Vector2d(15, -27), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(17.5, -32), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(12.5, -37), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(26.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                         return null;
@@ -199,9 +211,11 @@ public class BlueAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(11, -31), new SplineInterpolator(0, Math.toRadians(-135)))
-                    .lineTo(new Vector2d(4, -35), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(22, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+                    .lineTo(new Vector2d(9.5, -27), new SplineInterpolator(0, Math.toRadians(-135)))
+//                    .lineTo(new Vector2d(15, -27), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(9.5, -32), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(4.5, -37), new ConstantInterpolator(Math.toRadians(-135)))
+                    .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
                     .addMarker(() -> {
                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                         return null;
@@ -222,7 +236,7 @@ public class BlueAuto extends LinearOpMode {
 
         drive.followTrajectory(trajectory);
 //        robot.foundation_right.setPosition(0.2);
-//        robot.foundation_left.setPosition(0.46);
+//        robot.foundation_left.setPosition(0.2);
 //        sleep(500);
 //        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
 
@@ -251,12 +265,15 @@ public class BlueAuto extends LinearOpMode {
                 if (elapsedTime < 500) {
                     robot.left_intake.setPower(-0.2);
                     robot.right_intake.setPower(-0.2);
+                    robot.intake_wheel.setPower(-1);
                 } else if (elapsedTime < 2000) {
                     robot.left_intake.setPower(0.6);
                     robot.right_intake.setPower(0.6);
+                    robot.intake_wheel.setPower(1);
                 } else {
                     robot.left_intake.setPower(0);
                     robot.right_intake.setPower(0);
+                    robot.intake_wheel.setPower(0);
                     stateTimes.remove(State.INTAKE_OUT_AND_IN);
                 }
             }
@@ -265,16 +282,19 @@ public class BlueAuto extends LinearOpMode {
             if (stateTimes.containsKey(State.START_INTAKE)) {
                 robot.left_intake.setPower(0.6);
                 robot.right_intake.setPower(0.6);
+                robot.intake_wheel.setPower(1);
                 telemetry.addData("START_INTAKE", 0);
                 stateTimes.remove(State.START_INTAKE);
             } else if (stateTimes.containsKey(State.STOP_INTAKE)) {
                 robot.left_intake.setPower(0);
                 robot.right_intake.setPower(0);
+                robot.intake_wheel.setPower(0);
                 telemetry.addData("STOP_INTAKE", 0);
                 stateTimes.remove(State.STOP_INTAKE);
             } else if (stateTimes.containsKey(State.REVERSE_INTAKE)) {
                 robot.left_intake.setPower(-0.6);
                 robot.right_intake.setPower(-0.6);
+                robot.intake_wheel.setPower(-1);
                 telemetry.addData("REVERSE_INTAKE", 0);
                 stateTimes.remove(State.REVERSE_INTAKE);
             }
@@ -296,7 +316,7 @@ public class BlueAuto extends LinearOpMode {
                     robot.push_servo.setPosition(0);
                     robot.gripper_servo.setPosition(1);
                     robot.foundation_right.setPosition(0.2);
-                    robot.foundation_left.setPosition(0.46);
+                    robot.foundation_left.setPosition(0.2);
                 } else if (elapsedTime < 1000) {
                     robot.left_intake.setPower(0.8);
                     robot.right_intake.setPower(0.8);
@@ -304,6 +324,7 @@ public class BlueAuto extends LinearOpMode {
                     // start intake
                     robot.left_intake.setPower(0.6);
                     robot.right_intake.setPower(0.6);
+                    robot.intake_wheel.setPower(1);
                     robot.push_servo.setPosition(0.35);
                     stateTimes.remove(State.RESET_SERVOS);
                 }
@@ -345,7 +366,7 @@ public class BlueAuto extends LinearOpMode {
 
             if (stateTimes.containsKey(State.LIFT_GRIPPERS)) {
                 robot.foundation_right.setPosition(0.2);
-                robot.foundation_left.setPosition(0.46);
+                robot.foundation_left.setPosition(0.4);
                 stateTimes.remove(State.LIFT_GRIPPERS);
             }
 
