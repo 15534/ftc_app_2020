@@ -47,6 +47,7 @@ public class HardwareDrivetrain
 
     public Servo push_servo, gripper_servo, left_v4b, right_v4b;
     public Servo foundation_left, foundation_right;
+    public Servo park_servo;
     public CRServo intake_wheel;
     public PwmControl left_v4b_pwm, right_v4b_pwm;
 
@@ -67,6 +68,9 @@ public class HardwareDrivetrain
         // servos
         push_servo = hardwareMap.servo.get(HardwareNames.push_servo);
         gripper_servo = hardwareMap.servo.get(HardwareNames.gripper_servo);
+
+        park_servo = hardwareMap.servo.get(HardwareNames.park_servo);
+        park_servo.setDirection(Servo.Direction.REVERSE);
 
         foundation_left = hardwareMap.servo.get(HardwareNames.foundation_left);
         foundation_right = hardwareMap.servo.get(HardwareNames.foundation_right);

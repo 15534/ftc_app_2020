@@ -9,7 +9,6 @@ import com.acmerobotics.roadrunner.path.heading.ConstantInterpolator;
 import com.acmerobotics.roadrunner.path.heading.LinearInterpolator;
 import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.disnodeteam.dogecv.detectors.skystone.SkystoneDetector;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -22,10 +21,12 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
-import java.io.*;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 
-import static org.firstinspires.ftc.robotcore.internal.system.AppUtil.ROOT_FOLDER;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_G;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
 import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_i;
@@ -36,8 +37,8 @@ import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
  * drives in a DISTANCE-by-DISTANCE square indefinitely.
  */
 @Config
-@Autonomous(group = "drive", name = "Blue Auto")
-public class BlueAuto extends LinearOpMode {
+@Autonomous(group = "drive", name = "Blue Two Block Auto")
+public class BlueTwoBlockAuto extends LinearOpMode {
     private OpenCvInternalCamera phoneCam;
     private NewStoneDetector skyStoneDetector;
 
@@ -46,7 +47,7 @@ public class BlueAuto extends LinearOpMode {
     enum State {
         INTAKE_OUT_AND_IN, RESET_SERVOS, STOP_INTAKE, START_INTAKE, REVERSE_INTAKE,
         DROP_GRIPPERS_HALFWAY, DROP_GRIPPERS_FULLY, LIFT_GRIPPERS, GO_TO_STACK_POSITION,
-        GO_TO_LIFT_POSITION, DROP_BLOCK
+        GO_TO_LIFT_POSITION, DROP_BLOCK, GO_TO_BLOCK_2
     }
     @Override
     public void runOpMode() throws InterruptedException {
@@ -93,7 +94,6 @@ public class BlueAuto extends LinearOpMode {
         skyStoneDetector = new NewStoneDetector(false);
         phoneCam.setPipeline(skyStoneDetector);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
-        double xPosition;
         int stonePosition = 0;  // 0: front, 1: center, 2: back
 
         boolean exposureLocked = false;
@@ -426,9 +426,10 @@ public class BlueAuto extends LinearOpMode {
                         .build();
                     drive.followTrajectorySync(trajectory2);
                     Trajectory trajectory3 = drive.trajectoryBuilder()
-                            .lineTo(new Vector2d(40, -28), new ConstantInterpolator(Math.toRadians(180)))
+                            .lineTo(new Vector2d(20, -28), new ConstantInterpolator(Math.toRadians(180)))
                             .build();
                     drive.followTrajectorySync(trajectory3);
+                    stateTimes.put(State.GO_TO_BLOCK_2, null);
                 }
             }
 
@@ -450,6 +451,87 @@ public class BlueAuto extends LinearOpMode {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);
                     stateTimes.put(State.DROP_BLOCK, null);
                 }
+            }
+
+            if (stateTimes.containsKey(State.GO_TO_BLOCK_2)) {
+                stateTimes.remove(State.GO_TO_BLOCK_2);
+                if (stonePosition == 0) {
+                    trajectory = drive.trajectoryBuilder()
+                            .addMarker(() -> {
+                                stateTimes.put(State.START_INTAKE, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(9.5, -27), new SplineInterpolator(Math.toRadians(180), Math.toRadians(-135)))
+                            .lineTo(new Vector2d(9.5, -32), new ConstantInterpolator(Math.toRadians(-135)))
+                            .lineTo(new Vector2d(4.5, -37), new ConstantInterpolator(Math.toRadians(-135)))
+                            .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+                            .addMarker(() -> {
+                                stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+                            .addMarker(() -> {
+                                stateTimes.put(State.STOP_INTAKE, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(74, -27), new ConstantInterpolator(Math.toRadians(-180)))
+                            .build();
+                } else if (stonePosition == 1) {
+                    trajectory = drive.trajectoryBuilder()
+                            .addMarker(() -> {
+                                stateTimes.put(State.RESET_SERVOS, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(9.5, -32), new ConstantInterpolator(Math.toRadians(-135)))
+                            .lineTo(new Vector2d(4.5, -37), new ConstantInterpolator(Math.toRadians(-135)))
+                            .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+                            .addMarker(() -> {
+                                stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+                            .addMarker(() -> {
+                                stateTimes.put(State.STOP_INTAKE, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(87, -32), new ConstantInterpolator(Math.toRadians(90)))
+                            .addMarker(new Vector2d(87, -34), () -> {
+                                stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+                                return null; // go to stack pos
+                            })
+                            .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
+                            .build();
+
+                } else {
+                    trajectory = drive.trajectoryBuilder()
+                            .addMarker(() -> {
+                                stateTimes.put(State.RESET_SERVOS, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(9.5, -27), new SplineInterpolator(0, Math.toRadians(-135)))
+//                    .lineTo(new Vector2d(15, -27), new ConstantInterpolator(Math.toRadians(-135)))
+                            .lineTo(new Vector2d(9.5, -32), new ConstantInterpolator(Math.toRadians(-135)))
+                            .lineTo(new Vector2d(4.5, -37), new ConstantInterpolator(Math.toRadians(-135)))
+                            .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+                            .addMarker(() -> {
+                                stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+                            .addMarker(() -> {
+                                stateTimes.put(State.STOP_INTAKE, null);
+                                return null;
+                            })
+                            .lineTo(new Vector2d(87, -32), new ConstantInterpolator(Math.toRadians(90)))
+                            .addMarker(new Vector2d(87, -34), () -> {
+                                stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+                                return null; // go to stack pos
+                            })
+                            .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
+                            .build();
+                }
+
+                drive.followTrajectory(trajectory);
             }
 
             // use PID to hold lift position

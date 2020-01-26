@@ -54,7 +54,7 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryGlobalCoordinatePosition;
  */
 
 @TeleOp(name="Servo Test", group="Competition")
-@Disabled
+//@Disabled
 public class ServoTest extends LinearOpMode {
 
     /* Declare OpMode members. */
@@ -83,10 +83,10 @@ public class ServoTest extends LinearOpMode {
 
             if (gamepad1.dpad_up) {
                 double newPosition = Math.min(currentPosition + 0.01, 1);
-                robot.gripper_servo.setPosition(newPosition);
+                robot.park_servo.setPosition(newPosition);
             } else if (gamepad1.dpad_down) {
                 double newPosition = Math.max(currentPosition - 0.01, 0);
-                robot.gripper_servo.setPosition(newPosition);
+                robot.park_servo.setPosition(newPosition);
             }
 
             telemetry.addData("position:", currentPosition);

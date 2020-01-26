@@ -67,7 +67,7 @@ public class TeleOp extends LinearOpMode {
     ElapsedTime left_trigger_time = null;
     ElapsedTime right_trigger_time = null;
     boolean start_button_pressed = false;
-    private double DPAD_SPEED = 0.35;
+//    private double DPAD_SPEED = 0.35;
     private double BUMPER_ROTATION_SPEED = 0.4;
     private double FCD_ROTATION_SPEED = 0.8;
     ElapsedTime dpad_accel = new ElapsedTime();
@@ -137,6 +137,7 @@ public class TeleOp extends LinearOpMode {
         robot.gripper_servo.setPosition(lastGripperPosition);
         robot.foundation_right.setPosition(0.2);
         robot.foundation_left.setPosition(0.4);
+        robot.park_servo.setPosition(0);
 
         // save last auto in file
         String fname = AppUtil.ROOT_FOLDER + "/lastAuto.txt";
@@ -260,6 +261,14 @@ public class TeleOp extends LinearOpMode {
 
             // dpad drive controls
             if (gamepad1.dpad_up || gamepad1.dpad_right || gamepad1.dpad_left || gamepad1.dpad_down) {
+                double DPAD_SPEED;
+                if (drivetrainSpeedAdjust == 2) {
+                    // speed up slightly when left trigger pressed
+                    DPAD_SPEED = 0.45;
+                } else {
+                    DPAD_SPEED = 0.35;
+                }
+
                 double dpadSpeed = Math.min(DPAD_SPEED, dpad_accel.milliseconds() / millisecondsToFullSpeed);
 
                 if (gamepad1.dpad_up) {
@@ -421,8 +430,8 @@ public class TeleOp extends LinearOpMode {
                 } else if (stack_routine_time.milliseconds() < 1200) {
                     robot.push_servo.setPosition(1);
                 } else if (stack_routine_time.milliseconds() < 1500) {
-                    robot.left_v4b.setPosition(0.75);
-                    robot.right_v4b.setPosition(0.75);
+                    robot.left_v4b.setPosition(0.72);
+                    robot.right_v4b.setPosition(0.72);
                 } else if (stack_routine_time.milliseconds() < 1800) {
                     robot.gripper_servo.setPosition(0.4);
                     intakeSpeed = 0;
@@ -635,6 +644,13 @@ public class TeleOp extends LinearOpMode {
                 // up
                 robot.foundation_right.setPosition(0.2);
                 robot.foundation_left.setPosition(0.4);
+            }
+
+            // deploy park servo
+            if (gamepad1.x && (gamepad2.left_trigger > 0.85) && (gamepad2.right_trigger > 0.85)) {
+                robot.park_servo.setPosition(1);
+                sleep(2000);
+                robot.park_servo.setPosition(0);
             }
 
             // set motor powers

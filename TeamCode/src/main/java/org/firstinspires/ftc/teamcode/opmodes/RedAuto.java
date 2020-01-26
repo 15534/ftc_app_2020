@@ -384,8 +384,8 @@ public class RedAuto extends LinearOpMode {
                 } else if (elapsedTime < 900) {
                     robot.push_servo.setPosition(1);
                 } else if (elapsedTime < 1200) {
-                    robot.left_v4b.setPosition(0.75);
-                    robot.right_v4b.setPosition(0.75);
+                    robot.left_v4b.setPosition(0.72);
+                    robot.right_v4b.setPosition(0.72);
                 } else if (elapsedTime < 1500) {
                     robot.gripper_servo.setPosition(0.4);
                 } else {
@@ -409,8 +409,8 @@ public class RedAuto extends LinearOpMode {
                     robot.gripper_servo.setPosition(1);
                 } else if (elapsedTime < 1000) {
                     // reset v4b's to grab position
-                    robot.left_v4b.setPosition(0.75);
-                    robot.right_v4b.setPosition(0.75);
+                    robot.left_v4b.setPosition(0.72);
+                    robot.right_v4b.setPosition(0.72);
                 } else if (elapsedTime < 1500) {
                     target = 0;
                 } else if (elapsedTime < 2000) {
