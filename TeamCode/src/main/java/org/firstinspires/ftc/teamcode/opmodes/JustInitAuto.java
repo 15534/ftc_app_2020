@@ -50,7 +50,7 @@ public class JustInitAuto extends LinearOpMode {
 
         waitForStart();
 
-//        sleep(5000);
+        sleep(5000);
         robot.left_v4b.setPosition(0.6);
         robot.right_v4b.setPosition(0.6);
         sleep(500);
