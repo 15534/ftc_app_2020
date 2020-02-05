@@ -29,10 +29,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
-import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_G;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_d;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_i;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_p;
+import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_G;
+import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_d;
+import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_i;
+import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_p;
 
 /*
  * Op mode for tuning follower PID coefficients (located in the drive base classes). The robot

@@ -2,12 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
-import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.path.heading.LinearInterpolator;
-import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
-import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,10 +21,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TELE_OP_CONSTRAINTS;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_G;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_d;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_i;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_p;
+import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_G;
+import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_d;
+import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_i;
+import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_p;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
