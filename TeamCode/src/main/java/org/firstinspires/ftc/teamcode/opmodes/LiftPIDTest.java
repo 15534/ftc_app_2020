@@ -37,6 +37,7 @@ import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -57,20 +58,14 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
  */
 
 @Config
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="PID Lift Test")
+@TeleOp(name="PID Lift Test")
 public class LiftPIDTest extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareDrivetrain robot = new HardwareDrivetrain();
-    public static double k_p = 0.003;
-    public static double k_i = 0;
-    public static double k_d = 0;
-    public static double k_V = 0.001;
-    public static double k_G = -0.005;
-    public static double maxVel = 100;
-    public static double maxAccel = 200;
-    public static double maxJerk = 200;
-//    public static double target = -800;
+
+    private boolean bumperActive = false;
+    public static double distance = 20;
 
 
     @Override
@@ -85,47 +80,32 @@ public class LiftPIDTest extends LinearOpMode {
         telemetry.addData("Say", "Hello Driver");    //
         telemetry.update();
 
-        robot.lift_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.lift_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         robot.left_v4b.setPosition(0.75);
         robot.right_v4b.setPosition(0.75);
 
-        PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
-        PIDFController controller = new PIDFController(liftPidCoefficients, k_V, 0, k_G);
 
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-
-        controller.setOutputBounds(-1, 1);
-
-        MotionProfile profile = MotionProfileGenerator.generateSimpleMotionProfile(new MotionState(0,0,0),
-                new MotionState(-500, 0,0), maxVel, maxAccel, maxJerk);
-
+        LiftController lift = new LiftController(hardwareMap);
         ElapsedTime t = new ElapsedTime();
 
         // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
-            double lift_position = robot.lift_left.getCurrentPosition();
-//            double correction = controller.update(lift_position);
-            MotionState desiredMotionState = profile.get(t.seconds());
-            controller.setTargetPosition(desiredMotionState.getX());
-            double correction = controller.update(lift_position, desiredMotionState.getV(), desiredMotionState.getA());
-            robot.lift_left.setPower(correction);
-            robot.lift_right.setPower(correction);
-
-//            telemetry.addData("right", robot.lift_right.getCurrentPosition());
-            telemetry.addData("position", lift_position);
-            telemetry.addData("correction", correction);
-            telemetry.addData("x", desiredMotionState.getX());
-            telemetry.addData("v", desiredMotionState.getV());
-            telemetry.addData("a", desiredMotionState.getA());
-
-//            telemetry.addData("power", gamepad1.right_stick_y);
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+        while(opModeIsActive()) {
+            telemetry.addData("lift_mode", lift.mode);
+            telemetry.addData("lift_correction", lift.correction);
+            telemetry.addData("timer", lift.timer.seconds());
+            if (lift.profile != null) {
+                telemetry.addData("profile", lift.profile.get(lift.timer.seconds()).getX());
+                telemetry.addData("profile duration", lift.profile.duration());
+            }
+            telemetry.addData("position", lift.currentPosition);
             telemetry.update();
+            if (gamepad2.a) {
+                lift.moveToPosition(distance);
+            } if (gamepad2.b) {
+                lift.moveToPosition(0);
+            }
+            lift.update();
         }
     }
 }

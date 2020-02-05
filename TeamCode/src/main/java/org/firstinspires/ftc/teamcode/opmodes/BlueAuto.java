@@ -26,10 +26,10 @@ import java.io.*;
 import java.util.HashMap;
 
 import static org.firstinspires.ftc.robotcore.internal.system.AppUtil.ROOT_FOLDER;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_G;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_i;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_G;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_d;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_i;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_p;
 
 /*
  * Op mode for tuning follower PID coefficients (located in the drive base classes). The robot

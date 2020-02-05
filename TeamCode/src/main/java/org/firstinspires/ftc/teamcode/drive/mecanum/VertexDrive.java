@@ -35,7 +35,7 @@ public class VertexDrive extends BaseMecanumDrive {
     private ExpansionHubEx hub;
     private ExpansionHubMotor leftFront, leftRear, rightRear, rightFront;
     private List<ExpansionHubMotor> motors;
-    private BNO055IMU imu;
+//    private BNO055IMU imu;
 
     public VertexDrive(HardwareMap hardwareMap) {
         super();
@@ -47,14 +47,14 @@ public class VertexDrive extends BaseMecanumDrive {
         // if your motors are split between hubs, **you will need to add another bulk read**
         hub = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);
+//        imu = hardwareMap.get(BNO055IMU.class, "imu");
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+//        imu.initialize(parameters);
 
         // TO-DO: if your hub is mounted vertically, remap the IMU axes so that the z-axis points
         // upward (normal to the floor) using a command like the following:
-        BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
+//        BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
 
         leftFront = hardwareMap.get(ExpansionHubMotor.class, HardwareNames.left_front);
         leftRear = hardwareMap.get(ExpansionHubMotor.class, HardwareNames.left_back);
@@ -143,6 +143,7 @@ public class VertexDrive extends BaseMecanumDrive {
 
     @Override
     public double getRawExternalHeading() {
-        return imu.getAngularOrientation().firstAngle;
+//        return imu.getAngularOrientation().firstAngle;
+        return 0;
     }
 }

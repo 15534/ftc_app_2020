@@ -26,10 +26,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TELE_OP_CONSTRAINTS;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_d;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_i;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_p;
-import static org.firstinspires.ftc.teamcode.opmodes.LiftPIDTest.k_G;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_G;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_d;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_i;
+import static org.firstinspires.ftc.teamcode.opmodes.LiftController.k_p;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.

@@ -51,7 +51,6 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
  */
 
 @TeleOp(name="Lift Test")
-@Disabled
 public class LiftTest extends LinearOpMode {
 
     /* Declare OpMode members. */
