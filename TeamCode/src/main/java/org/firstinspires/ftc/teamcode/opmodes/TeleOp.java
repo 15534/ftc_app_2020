@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.disnodeteam.dogecv.math.Line;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,6 +27,7 @@ import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_d;
 import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_i;
 import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_p;
 
+
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
  * All device access is managed through the HardwareTwoMotors class.
@@ -44,7 +46,7 @@ import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_p;
 public class TeleOp extends LinearOpMode {
 
     /* Declare OpMode members. */
-    HardwareDrivetrain robot = new HardwareDrivetrain();
+    ServoController robot = new ServoController();
 
     private double THRESHOLD = 0.05;
     ElapsedTime accel = new ElapsedTime();
@@ -126,13 +128,11 @@ public class TeleOp extends LinearOpMode {
         // initialize servos
         double lastGripperPosition = 1;
 
-        robot.left_v4b.setPosition(0.6);
-        robot.right_v4b.setPosition(0.6);
-        robot.push_servo.setPosition(0.35);
+        robot.v4bWait();
+        robot.pushServoDown();
         robot.gripper_servo.setPosition(lastGripperPosition);
-        robot.foundation_right.setPosition(0.2);
-        robot.foundation_left.setPosition(0.4);
-        robot.park_servo.setPosition(0);
+        robot.foundationUp();
+        robot.parkOff();
 
         // save last auto in file
         String fname = AppUtil.ROOT_FOLDER + "/lastAuto.txt";
@@ -373,7 +373,7 @@ public class TeleOp extends LinearOpMode {
                     robot.gripper_servo.setPosition(lastGripperPosition);
                 } else {
                     lastGripperPosition = currentGripperPosition;
-                    robot.gripper_servo.setPosition(0);
+                    robot.ungrip();
                 }
             } else if (!gamepad1.y) {
                 gamepad1YPressed = false;
@@ -416,17 +416,16 @@ public class TeleOp extends LinearOpMode {
             }
             if (stack_routine_time != null) {
                 if (stack_routine_time.milliseconds() < 300) {
-                    robot.push_servo.setPosition(0.35);
+                    robot.pushServoDown();
                 } else if (stack_routine_time.milliseconds() < 600) {
-                    robot.push_servo.setPosition(1);
+                    robot.pushServoUp();
                 } else if (stack_routine_time.milliseconds() < 900) {
-                    robot.push_servo.setPosition(0.35);
-                    robot.gripper_servo.setPosition(1);
+                    robot.pushServoDown();
+                    robot.grip();
                 } else if (stack_routine_time.milliseconds() < 1200) {
-                    robot.push_servo.setPosition(1);
+                    robot.pushServoUp();
                 } else if (stack_routine_time.milliseconds() < 1500) {
-                    robot.left_v4b.setPosition(0.72);
-                    robot.right_v4b.setPosition(0.72);
+                    robot.v4bStack();
                 } else if (stack_routine_time.milliseconds() < 1800) {
                     robot.gripper_servo.setPosition(0.4);
                     intakeSpeed = 0;
@@ -444,7 +443,7 @@ public class TeleOp extends LinearOpMode {
             if (lift_routine_time != null) {
                 if (lift_routine_time.milliseconds() < 500) {
                     // get pusher out of the way
-                    robot.push_servo.setPosition(0.35);
+                    robot.pushServoDown();
                 } else if (lift_routine_time.milliseconds() < 600){
                     if (desiredLiftPosition < 8) {
                         target = -50 + -127 * desiredLiftPosition;
@@ -459,11 +458,9 @@ public class TeleOp extends LinearOpMode {
                     // extend v4b servos to drop position
                     if (capPosition) {
                         // capstone level
-                        robot.left_v4b.setPosition(0.5);
-                        robot.right_v4b.setPosition(0.5);
+                        robot.v4bCapstone();
                     } else {
-                        robot.left_v4b.setPosition(0);
-                        robot.right_v4b.setPosition(0);
+                        robot.v4bDown();
                     }
                     if (desiredLiftPosition < 8) {
                         desiredLiftPosition++;
@@ -504,8 +501,8 @@ public class TeleOp extends LinearOpMode {
             }
             if (drop_routine_time != null) {
                 if (drop_routine_time.milliseconds() < 400) {
-                    // release the gripper
-                    robot.gripper_servo.setPosition(1);
+                    //release the gripper
+                    robot.grip();
                     goneUp = false;
                 } else if (drop_routine_time.milliseconds() < 500) {
                     if (!goneUp) {
@@ -530,8 +527,7 @@ public class TeleOp extends LinearOpMode {
             if (drop_routine_2_time != null) {
                 if (drop_routine_2_time.milliseconds() < 400) {
                     // reset v4b's to grab position
-                    robot.left_v4b.setPosition(0.75);
-                    robot.right_v4b.setPosition(0.75);
+                    robot.v4bGrab();
                     telemetry.addLine("grab position");
                 } else if (drop_routine_2_time.milliseconds() < 800) {
                     // lower the lift
@@ -540,8 +536,7 @@ public class TeleOp extends LinearOpMode {
                 } else if (drop_routine_2_time.milliseconds() < 1600) {
                     telemetry.addLine("wait position");
                     // reset v4b's to wait position
-                    robot.left_v4b.setPosition(0.6);
-                    robot.right_v4b.setPosition(0.6);
+                    robot.v4bWait();
                     intakeSpeed = 0.6;
                     lastIntakeButton = "on";
                 } else {
@@ -572,10 +567,9 @@ public class TeleOp extends LinearOpMode {
             if (gamepad2.left_stick_button) {
                 telemetry.addLine("RE-INITIALIZE!");
                 // initialize servos
-                robot.left_v4b.setPosition(0.6);
-                robot.right_v4b.setPosition(0.6);
-                robot.push_servo.setPosition(0.35);
-                robot.gripper_servo.setPosition(1);
+                robot.v4bWait();
+                robot.pushServoDown();
+                robot.pushServoUp();
             }
 
             if (capPosition) {
@@ -633,19 +627,17 @@ public class TeleOp extends LinearOpMode {
             // foundation gripper
             if (gamepad2.left_stick_y > 0.05) {
                 // down
-                robot.foundation_left.setPosition(1);
-                robot.foundation_right.setPosition(1);
+                robot.foundationDown();
             } else if (gamepad2.left_stick_y < -0.05) {
                 // up
-                robot.foundation_right.setPosition(0.2);
-                robot.foundation_left.setPosition(0.4);
+                robot.foundationUp();
             }
 
             // deploy park servo
             if (gamepad1.x && (gamepad2.left_trigger > 0.85) && (gamepad2.right_trigger > 0.85)) {
-                robot.park_servo.setPosition(1);
+                robot.parkOn();
                 sleep(2000);
-                robot.park_servo.setPosition(0);
+                robot.parkOff();
             }
 
             // set motor powers

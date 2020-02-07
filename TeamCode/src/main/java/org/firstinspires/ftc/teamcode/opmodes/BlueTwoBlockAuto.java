@@ -44,7 +44,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
     private OpenCvInternalCamera phoneCam;
     private NewStoneDetector skyStoneDetector;
 
-    HardwareDrivetrain robot = new HardwareDrivetrain();
+    ServoController robot = new ServoController();
 
     enum State {
         INTAKE_OUT_AND_IN, RESET_SERVOS, STOP_INTAKE, START_INTAKE, REVERSE_INTAKE,
@@ -76,10 +76,9 @@ public class BlueTwoBlockAuto extends LinearOpMode {
         robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        robot.push_servo.setPosition(0);
-        robot.gripper_servo.setPosition(1);
-        robot.foundation_right.setPosition(0);
-        robot.foundation_left.setPosition(0);
+        robot.pushServoReset();
+        robot.grip();
+        robot.foundationReset();
 
         PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
         PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
@@ -328,10 +327,9 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                 telemetry.addData("RESET_SERVOS", elapsedTime);
 
                 if (elapsedTime < 500) {
-                    robot.left_v4b.setPosition(0.6);
-                    robot.right_v4b.setPosition(0.6);
-                    robot.push_servo.setPosition(0);
-                    robot.gripper_servo.setPosition(1);
+                    robot.v4bWait();
+                    robot.pushServoReset();
+                    robot.grip();
                     robot.foundation_right.setPosition(0.2);
                     robot.foundation_left.setPosition(0.2);
                 } else if (elapsedTime < 1000) {
@@ -342,15 +340,14 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     robot.left_intake.setPower(0.6);
                     robot.right_intake.setPower(0.6);
                     robot.intake_wheel.setPower(1);
-                    robot.push_servo.setPosition(0.35);
+                    robot.pushServoDown();
                     stateTimes.remove(State.RESET_SERVOS);
                 }
             }
 
             // drop grippers fully
             if (stateTimes.containsKey(State.DROP_GRIPPERS_FULLY)) {
-                robot.foundation_left.setPosition(1);
-                robot.foundation_right.setPosition(1);
+                robot.foundationDown();
                 drive.setMotorPowers(0,0,0,0);
                 sleep(500); // pause while grippers fall
                 stateTimes.remove(State.DROP_GRIPPERS_FULLY);
@@ -386,8 +383,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
             }
 
             if (stateTimes.containsKey(State.LIFT_GRIPPERS)) {
-                robot.foundation_right.setPosition(0.2);
-                robot.foundation_left.setPosition(0.4);
+                robot.foundationUp();
                 stateTimes.remove(State.LIFT_GRIPPERS);
             }
 
@@ -400,17 +396,16 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                 }
 
                 if (elapsedTime < 300) {
-                    robot.push_servo.setPosition(1);
+                    robot.pushServoUp();
                 } else if (elapsedTime < 600) {
-                    robot.push_servo.setPosition(0.35);
-                    robot.gripper_servo.setPosition(1);
+                    robot.pushServoDown();
+                    robot.grip();
                 } else if (elapsedTime < 900) {
-                    robot.push_servo.setPosition(1);
+                    robot.pushServoUp();
                 } else if (elapsedTime < 1200) {
-                    robot.left_v4b.setPosition(0.72);
-                    robot.right_v4b.setPosition(0.72);
+                    robot.v4bStack();
                 } else if (elapsedTime < 1500) {
-                    robot.gripper_servo.setPosition(0.4);
+                    robot.midgrip();
                 } else {
                     stateTimes.remove(State.GO_TO_STACK_POSITION);
 //                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
@@ -426,20 +421,17 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                 }
 
                 if (elapsedTime < 300) {
-                    robot.left_v4b.setPosition(0);
-                    robot.right_v4b.setPosition(0);
+                    robot.v4bDown();
                 } else if (elapsedTime < 700) {
-                    robot.gripper_servo.setPosition(1);
+                    robot.grip();
                 } else if (elapsedTime < 1000) {
                     // reset v4b's to grab position
-                    robot.left_v4b.setPosition(0.72);
-                    robot.right_v4b.setPosition(0.72);
+                    robot.v4bStack();
                 } else if (elapsedTime < 1500) {
                     target = 0;
                 } else if (elapsedTime < 2000) {
                     // reset v4b's to wait position
-                    robot.left_v4b.setPosition(0.6);
-                    robot.right_v4b.setPosition(0.6);
+                    robot.v4bWait();
                 } else {
                     stateTimes.remove(State.DROP_BLOCK);
                     if (blocksCollected == 1) {
@@ -473,8 +465,8 @@ public class BlueTwoBlockAuto extends LinearOpMode {
 
                 if (elapsedTime < 300) {
                     // get pusher out of the way
-                    robot.gripper_servo.setPosition(0.4);
-                    robot.push_servo.setPosition(0.35);
+                    robot.midgrip();
+                    robot.pushServoDown();
                 } else if (elapsedTime < 500){
                     target = -100;
                 } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) < 5) {
