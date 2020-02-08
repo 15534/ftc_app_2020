@@ -82,8 +82,8 @@ public class DriveConstants {
     );
 
     public static DriveConstraints TELE_OP_CONSTRAINTS = new DriveConstraints(
-            80, 40, 0,
-            Math.toRadians(360), Math.toRadians(180.0), 0.0
+            100, 40, 0,
+            Math.toRadians(360*3), Math.toRadians(360*4), 0.0
     );
 
 

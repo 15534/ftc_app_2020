@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -136,6 +137,7 @@ public class TeleOp extends LinearOpMode {
         boolean autoDriving = false;
         boolean gamepad1LeftStickButtonPressed = false;
         boolean gamepad1RightStickButtonPressed = false;
+        boolean motionSignal = false;
 
         // set drive contraints
         drive.setConstraints(TELE_OP_CONSTRAINTS);
@@ -145,6 +147,7 @@ public class TeleOp extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            motionSignal = false;
             lift.update();
             telemetry.addData("lag (ms)", lagTimer.milliseconds());
             lagTimer.reset();
@@ -184,8 +187,30 @@ public class TeleOp extends LinearOpMode {
 
             telemetry.addData("speed", drivetrainSpeedAdjust * 20);
 
+
+            // tank driving
+
+            // left - left joystick
+            // right - right joystick
+//            leftFrontSpeed = leftBackSpeed = -drivetrainSpeedAdjust * gamepad1.left_stick_y / 5;
+//            rightFrontSpeed = rightBackSpeed = -drivetrainSpeedAdjust * gamepad1.right_stick_y / 5;
+
+            if (Math.abs(gamepad1.left_stick_x) > 0.05 || (Math.abs(gamepad1.left_stick_y) > 0.05)
+                    || (Math.abs(gamepad1.right_stick_x) > 0.05)) {
+                motionSignal = true;
+                if (Math.abs(gamepad1.right_stick_x) < 0.05) {
+                    drive.setDriveSignal(new DriveSignal(
+                            new Pose2d(-300*gamepad1.left_stick_y,-300*gamepad1.left_stick_x, -3*gamepad1.right_stick_x)));
+                } else {
+                    drive.setDriveSignal(new DriveSignal(
+                            new Pose2d(-100*gamepad1.left_stick_y,-100*gamepad1.left_stick_x, -3*gamepad1.right_stick_x)));
+                }
+
+            }
+
             // rotate using bumpers
             if (gamepad1.left_bumper || gamepad1.right_bumper) {
+                motionSignal = true;
                 double bumperRotationSpeed = Math.min(BUMPER_ROTATION_SPEED,
                         bumper_rotate_accel.milliseconds() / millisecondsToFullSpeed);
 
@@ -193,40 +218,16 @@ public class TeleOp extends LinearOpMode {
                 bumperRotationSpeed = bumperRotationSpeed / drivetrainSpeedAdjust * 5;
 
                 if (gamepad1.left_bumper) {
-                    telemetry.addLine("left bumper");
                     leftBackSpeed = leftFrontSpeed = -bumperRotationSpeed;
                     rightBackSpeed = rightFrontSpeed = bumperRotationSpeed;
                 } else if (gamepad1.right_bumper) {
-                    telemetry.addLine("right bumper");
                     leftBackSpeed = leftFrontSpeed = bumperRotationSpeed;
                     rightBackSpeed = rightFrontSpeed = -bumperRotationSpeed;
                 }
+                drive.setMotorPowers(leftFrontSpeed, leftBackSpeed, rightBackSpeed, rightFrontSpeed);
 
             } else {
                 bumper_rotate_accel.reset();
-            }
-
-            // tank driving
-
-            // left - left joystick
-            // right - right joystick
-            leftFrontSpeed = leftBackSpeed = -drivetrainSpeedAdjust * gamepad1.left_stick_y / 5;
-            rightFrontSpeed = rightBackSpeed = -drivetrainSpeedAdjust * gamepad1.right_stick_y / 5;
-
-            // strafe
-            if (gamepad1.left_bumper || gamepad1.right_bumper) {
-                double strafeSpeed = drivetrainSpeedAdjust / 5.0;
-
-                if (gamepad1.left_bumper) {  // strafe left
-                    leftFrontSpeed = rightBackSpeed = -strafeSpeed;
-                    leftBackSpeed = rightFrontSpeed = strafeSpeed;
-                } else {  // strafe right
-                    leftFrontSpeed = rightBackSpeed = strafeSpeed;
-                    leftBackSpeed = rightFrontSpeed = -strafeSpeed;
-                }
-
-            } else {
-                strafe_accel.reset();
             }
 
             // dpad drive controls
@@ -252,7 +253,8 @@ public class TeleOp extends LinearOpMode {
                     leftFrontSpeed = rightBackSpeed = dpadSpeed;
                     leftBackSpeed = rightFrontSpeed = -dpadSpeed;
                 }
-
+                motionSignal = true;
+                drive.setMotorPowers(leftFrontSpeed, leftBackSpeed, rightBackSpeed, rightFrontSpeed);
             } else {
                 dpad_accel.reset();
             }
@@ -613,9 +615,13 @@ public class TeleOp extends LinearOpMode {
             }
 
             if (!autoDriving) {
-                drive.setMotorPowers(leftFrontSpeed, leftBackSpeed, rightBackSpeed, rightFrontSpeed);
+//                drive.setMotorPowers(leftFrontSpeed, leftBackSpeed, rightBackSpeed, rightFrontSpeed);
             } else {
                 telemetry.addLine("AUTO-DRIVING");
+            }
+
+            if (!motionSignal) {
+                drive.setMotorPowers(0,0,0,0);
             }
 
             drive.update();
