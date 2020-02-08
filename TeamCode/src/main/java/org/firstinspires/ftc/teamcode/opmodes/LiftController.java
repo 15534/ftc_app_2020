@@ -25,11 +25,15 @@ public class LiftController {
     public static double k_A = 0;
     public static double maxVel = 1000;
     public static double maxAccel = 3000;
+    public static double manualAccel = 500;
     public static double maxJerk = 2000;
+    public static double manualVel = 500;
     public static double encoderTicksPerInch = 29.625;
     private PIDFController controller;
     public double currentPosition = 0;
     public double correction = 0;
+    public double error = 0;
+    private double manualPower = 0;
 
     enum Mode {STOPPED, FOLLOWING_TRAJECTORY, CONTROLLING_VELOCITY}
     public Mode mode = Mode.STOPPED;
@@ -60,22 +64,30 @@ public class LiftController {
 
     public void update() {
         currentPosition = getDistance();
-        switch (mode) {
-            case STOPPED:
-                correction = controller.update(currentPosition);
-                break;
-            case FOLLOWING_TRAJECTORY:
-                MotionState desiredMotionState = profile.get(timer.seconds());
-                controller.setTargetPosition(desiredMotionState.getX());
-                correction = controller.update(currentPosition, desiredMotionState.getV(), desiredMotionState.getX());
-                if (profile.duration() <= timer.seconds()) {
-                    mode = Mode.STOPPED;
-                    controller.setTargetPosition(profile.end().getX());
-                }
-                break;
+        error = Math.abs(currentPosition - controller.getTargetPosition());
+
+        if (mode == Mode.STOPPED) {
+            correction = controller.update(currentPosition);
+        } else if (mode == Mode.FOLLOWING_TRAJECTORY) {
+            MotionState desiredMotionState = profile.get(timer.seconds());
+            controller.setTargetPosition(desiredMotionState.getX());
+            correction = controller.update(currentPosition, desiredMotionState.getV(), desiredMotionState.getX());
         }
-        lift_left.setPower(correction);
-        lift_right.setPower(correction);
+
+        if (mode == Mode.FOLLOWING_TRAJECTORY) {
+            if (profile != null && profile.duration() +0.3 <= timer.seconds()) {
+                mode = Mode.STOPPED;
+                controller.setTargetPosition(profile.end().getX());
+            }
+        }
+        if (mode == Mode.CONTROLLING_VELOCITY) {
+            lift_left.setPower(manualPower);
+            lift_right.setPower(manualPower);
+        } else {
+            lift_left.setPower(correction);
+            lift_right.setPower(correction);
+        }
+
     }
 
     public void moveToPosition(double distance) {
@@ -88,5 +100,20 @@ public class LiftController {
     private double getDistance() {
         double lift_position = lift_left.getCurrentPosition();
         return lift_position/encoderTicksPerInch;
+    }
+
+    public void moveAtVelocity(int velocity) {
+        timer.reset();
+        mode = Mode.CONTROLLING_VELOCITY;
+        if (velocity > 0) {
+            manualPower = 0.4;
+        } else if (velocity < 0) {
+            manualPower = -0.1;
+        }
+    }
+
+    public void stopMoving() {
+        controller.setTargetPosition(currentPosition);
+        mode = Mode.STOPPED;
     }
 }

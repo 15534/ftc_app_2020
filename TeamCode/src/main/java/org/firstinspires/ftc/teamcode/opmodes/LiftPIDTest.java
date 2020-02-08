@@ -105,6 +105,15 @@ public class LiftPIDTest extends LinearOpMode {
             } if (gamepad2.b) {
                 lift.moveToPosition(0);
             }
+
+            if (gamepad2.right_bumper && (lift.mode != LiftController.Mode.CONTROLLING_VELOCITY)) {
+                lift.moveAtVelocity(1);
+            } else if (gamepad2.left_bumper && (lift.mode != LiftController.Mode.CONTROLLING_VELOCITY)) {
+                lift.moveAtVelocity(-1);
+            } else if (!gamepad2.right_bumper && !gamepad2.left_bumper && lift.mode == LiftController.Mode.CONTROLLING_VELOCITY) {
+                lift.stopMoving();
+            }
+
             lift.update();
         }
     }

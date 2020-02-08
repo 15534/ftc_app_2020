@@ -9,7 +9,6 @@ import com.acmerobotics.roadrunner.path.heading.ConstantInterpolator;
 import com.acmerobotics.roadrunner.path.heading.LinearInterpolator;
 import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,9 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.NewStoneDetector;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.mecanum.VertexDrive;
-import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
@@ -77,7 +74,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
         robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         robot.pushServoReset();
-        robot.grip();
+        robot.gripRelease();
         robot.foundationReset();
 
         PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
@@ -329,7 +326,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                 if (elapsedTime < 500) {
                     robot.v4bWait();
                     robot.pushServoReset();
-                    robot.grip();
+                    robot.gripRelease();
                     robot.foundation_right.setPosition(0.2);
                     robot.foundation_left.setPosition(0.2);
                 } else if (elapsedTime < 1000) {
@@ -340,7 +337,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     robot.left_intake.setPower(0.6);
                     robot.right_intake.setPower(0.6);
                     robot.intake_wheel.setPower(1);
-                    robot.pushServoDown();
+                    robot.pushServoUp();
                     stateTimes.remove(State.RESET_SERVOS);
                 }
             }
@@ -396,16 +393,16 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                 }
 
                 if (elapsedTime < 300) {
-                    robot.pushServoUp();
-                } else if (elapsedTime < 600) {
                     robot.pushServoDown();
-                    robot.grip();
-                } else if (elapsedTime < 900) {
+                } else if (elapsedTime < 600) {
                     robot.pushServoUp();
+                    robot.gripRelease();
+                } else if (elapsedTime < 900) {
+                    robot.pushServoDown();
                 } else if (elapsedTime < 1200) {
                     robot.v4bStack();
                 } else if (elapsedTime < 1500) {
-                    robot.midgrip();
+                    robot.grip();
                 } else {
                     stateTimes.remove(State.GO_TO_STACK_POSITION);
 //                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
@@ -423,7 +420,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                 if (elapsedTime < 300) {
                     robot.v4bDown();
                 } else if (elapsedTime < 700) {
-                    robot.grip();
+                    robot.gripRelease();
                 } else if (elapsedTime < 1000) {
                     // reset v4b's to grab position
                     robot.v4bStack();
@@ -465,8 +462,8 @@ public class BlueTwoBlockAuto extends LinearOpMode {
 
                 if (elapsedTime < 300) {
                     // get pusher out of the way
-                    robot.midgrip();
-                    robot.pushServoDown();
+                    robot.grip();
+                    robot.pushServoUp();
                 } else if (elapsedTime < 500){
                     target = -100;
                 } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) < 5) {
