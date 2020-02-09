@@ -26,10 +26,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
-import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_G;
-import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_d;
-import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_i;
-import static org.firstinspires.ftc.teamcode.opmodes.OldLiftConstants.k_p;
 
 /*
  * Op mode for tuning follower PID coefficients (located in the drive base classes). The robot
@@ -68,20 +64,10 @@ public class BlueTwoBlockAuto extends LinearOpMode {
 
         }
 
-        // reset lift encoders
-        robot.lift_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.lift_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         robot.pushServoReset();
         robot.gripRelease();
         robot.foundationReset();
 
-        PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
-        PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
-                0, x -> k_G);
         int blocksCollected = 0; // number of blocks collected so far
 
         // TODO detect stone position here
@@ -465,7 +451,8 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     robot.grip();
                     robot.pushServoUp();
                 } else if (elapsedTime < 500){
-                    lift.moveToPosition(3.3755);
+                    if (lift.mode == LiftController.Mode.STOPPED)
+                        lift.moveToPosition(3.3755);
                 } else if (lift.mode == LiftController.Mode.STOPPED) {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);
                     blocksCollected += 1;
