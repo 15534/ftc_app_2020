@@ -465,7 +465,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     robot.grip();
                     robot.pushServoUp();
                 } else if (elapsedTime < 500){
-                    lift.moveToPosition(-3.3755);
+                    lift.moveToPosition(3.3755);
                 } else if (lift.mode == LiftController.Mode.STOPPED) {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);
                     blocksCollected += 1;
