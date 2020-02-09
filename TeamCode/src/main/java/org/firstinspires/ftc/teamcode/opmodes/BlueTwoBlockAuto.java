@@ -327,8 +327,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     robot.v4bWait();
                     robot.pushServoReset();
                     robot.gripRelease();
-                    robot.foundation_right.setPosition(0.2);
-                    robot.foundation_left.setPosition(0.2);
+                    robot.foundationUp();
                 } else if (elapsedTime < 1000) {
                     robot.left_intake.setPower(0.8);
                     robot.right_intake.setPower(0.8);
