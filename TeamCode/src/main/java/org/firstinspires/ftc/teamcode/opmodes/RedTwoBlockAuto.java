@@ -42,6 +42,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
     private NewStoneDetector skyStoneDetector;
 
     ServoController robot = new ServoController();
+    LiftController lift = null;
 
     enum State {
         INTAKE_OUT_AND_IN, RESET_SERVOS, STOP_INTAKE, START_INTAKE, REVERSE_INTAKE,
@@ -55,6 +56,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
 
         drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(180)));
         robot.init(hardwareMap);
+        lift = new LiftController(hardwareMap);
 
         // save last auto in file
         String fname = AppUtil.ROOT_FOLDER + "/lastAuto.txt";
@@ -66,21 +68,10 @@ public class RedTwoBlockAuto extends LinearOpMode {
 
         }
 
-        // reset lift encoders
-        robot.lift_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.lift_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        robot.lift_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.lift_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         robot.pushServoReset();
         robot.gripRelease();
         robot.foundationReset();
 
-        PIDCoefficients liftPidCoefficients = new PIDCoefficients(k_p, k_i, k_d);
-        PIDFController controller = new PIDFController(liftPidCoefficients, 0, 0,
-                0, x -> k_G);
-        double target = 0;  // target lift position
         int blocksCollected = 0; // number of blocks collected so far
 
         // TODO detect stone position here
@@ -473,7 +464,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
                     // reset v4b's to grab position
                     robot.v4bStack();
                 } else if (elapsedTime < 1500) {
-                    target = 0;
+                    lift.moveToPosition(0);
                 } else if (elapsedTime < 2000) {
                     // reset v4b's to wait position
                     robot.v4bWait();
@@ -514,8 +505,9 @@ public class RedTwoBlockAuto extends LinearOpMode {
                     robot.grip();
                     robot.pushServoUp();
                 } else if (elapsedTime < 500){
-                    target = -100;
-                } else if (Math.abs(robot.lift_left.getCurrentPosition() - target) < 5) {
+                    if (lift.mode == LiftController.Mode.STOPPED)
+                        lift.moveToPosition(3.3755);
+                } else if (lift.mode == LiftController.Mode.STOPPED) {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);
                     blocksCollected += 1;
                     if (blocksCollected >= 2) {
@@ -581,12 +573,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
                 drive.followTrajectory(trajectory);
             }
 
-            // use PID to hold lift position
-            controller.setTargetPosition(target);
-            double correction = controller.update(robot.lift_left.getCurrentPosition());
-            robot.lift_left.setPower(correction);
-            robot.lift_right.setPower(correction);
-
+            lift.update();
             telemetry.addData("stateTimes", stateTimes);
             telemetry.update();
         }
