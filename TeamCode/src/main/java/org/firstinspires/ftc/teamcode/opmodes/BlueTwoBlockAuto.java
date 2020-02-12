@@ -25,8 +25,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-
-
 /*
  * Op mode for tuning follower PID coefficients (located in the drive base classes). The robot
  * drives in a DISTANCE-by-DISTANCE square indefinitely.
@@ -43,7 +41,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
     enum State {
         INTAKE_OUT_AND_IN, RESET_SERVOS, STOP_INTAKE, START_INTAKE, REVERSE_INTAKE,
         DROP_GRIPPERS_HALFWAY, DROP_GRIPPERS_FULLY, LIFT_GRIPPERS, GO_TO_STACK_POSITION,
-        GO_TO_LIFT_POSITION, DROP_BLOCK, GO_TO_BLOCK_2
+        GO_TO_LIFT_POSITION, DROP_BLOCK, GO_TO_BLOCK_2, GO_TO_FOUNDATION
     }
     @Override
     public void runOpMode() throws InterruptedException {
@@ -132,6 +130,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
 //        stonePosition = 0;
 //        drive.setPoseEstimate(new Pose2d(84, -28, Math.toRadians(90)));
 
+
         if (stonePosition == 0) {
             telemetry.addLine("FRONT"); telemetry.update();
             trajectory = drive.trajectoryBuilder()
@@ -142,29 +141,34 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     .lineTo(new Vector2d(-4, -24), new SplineInterpolator(0, Math.toRadians(-30)))
                     .lineTo(new Vector2d(-4, -28), new ConstantInterpolator(Math.toRadians(-30)))
                     .lineTo(new Vector2d(8, -32), new ConstantInterpolator(Math.toRadians(-30)))
-                    .lineTo(new Vector2d(8, -28), new ConstantInterpolator(Math.toRadians(-30)))
-//                    .lineTo(new Vector2d(4, -24), new ConstantInterpolator(Math.toRadians(-30)))
-                    .lineTo(new Vector2d(23, -23), new LinearInterpolator(Math.toRadians(-30), Math.toRadians(-135)))
-                    .addMarker(new Vector2d(15, -23), () -> {
-                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
-                        stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
+                    .addMarker(new Vector2d(8, -31), () -> {
+                        stateTimes.put(State.GO_TO_FOUNDATION, null);
                         return null;
                     })
-                    .addMarker(new Vector2d(55, -23), () -> {
-                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
-                        return null;
-                    })
-                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
-                    .addMarker(() -> {
-                        stateTimes.put(State.STOP_INTAKE, null);
-                        return null;
-                    })
-                    .lineTo(new Vector2d(87, -32), new SplineInterpolator(Math.toRadians(-180), Math.toRadians(-270)))
-                    .addMarker(new Vector2d(87, -34), () -> {
-                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
-                        return null; // go to stack pos
-                    })
-                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
+                    .lineTo(new Vector2d(8, -30), new ConstantInterpolator(Math.toRadians(-30)))
+//                    .lineTo(new Vector2d(8, -28), new ConstantInterpolator(Math.toRadians(-30)))
+////                    .lineTo(new Vector2d(4, -24), new ConstantInterpolator(Math.toRadians(-30)))
+//                    .lineTo(new Vector2d(23, -23), new LinearInterpolator(Math.toRadians(-30), Math.toRadians(-135)))
+//                    .addMarker(new Vector2d(15, -23), () -> {
+//                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+//                        stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
+//                        return null;3
+//                    })
+//                    .addMarker(new Vector2d(55, -23), () -> {
+//                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+//                        return null;
+//                    })
+//                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+//                    .addMarker(() -> {
+//                        stateTimes.put(State.STOP_INTAKE, null);
+//                        return null;
+//                    })
+//                    .lineTo(new Vector2d(87, -32), new SplineInterpolator(Math.toRadians(-180), Math.toRadians(-270)))
+//                    .addMarker(new Vector2d(87, -34), () -> {
+//                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+//                        return null; // go to stack pos
+//                    })
+//                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
                     .build();
         } else if (stonePosition == 1) {
             telemetry.addLine("CENTER");
@@ -178,26 +182,31 @@ public class BlueTwoBlockAuto extends LinearOpMode {
 //                    .lineTo(new Vector2d(15, -27), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(17.5, -32), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(12.5, -37), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(26.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
-                    .addMarker(() -> {
-                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                    .addMarker(new Vector2d(12.5, -36), () -> {
+                        stateTimes.put(State.GO_TO_FOUNDATION, null);
                         return null;
                     })
-                    .addMarker(new Vector2d(55, -23), () -> {
-                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
-                        return null;
-                    })
-                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
-                    .addMarker(() -> {
-                        stateTimes.put(State.STOP_INTAKE, null);
-                        return null;
-                    })
-                    .lineTo(new Vector2d(87, -32), new SplineInterpolator(Math.toRadians(-180), Math.toRadians(-270)))
-                    .addMarker(new Vector2d(87, -34), () -> {
-                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
-                        return null; // go to stack pos
-                    })
-                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
+                    .lineTo(new Vector2d(12.5, -35), new ConstantInterpolator(Math.toRadians(-135)))
+//                    .lineTo(new Vector2d(26.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+//                    .addMarker(() -> {
+//                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+//                        return null;
+//                    })
+//                    .addMarker(new Vector2d(55, -23), () -> {
+//                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+//                        return null;
+//                    })
+//                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+//                    .addMarker(() -> {
+//                        stateTimes.put(State.STOP_INTAKE, null);
+//                        return null;
+//                    })
+//                    .lineTo(new Vector2d(87, -32), new SplineInterpolator(Math.toRadians(-180), Math.toRadians(-270)))
+//                    .addMarker(new Vector2d(87, -34), () -> {
+//                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+//                        return null; // go to stack pos
+//                    })
+//                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
                     .build();
 
         } else {
@@ -211,26 +220,31 @@ public class BlueTwoBlockAuto extends LinearOpMode {
 //                    .lineTo(new Vector2d(15, -27), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(9.5, -32), new ConstantInterpolator(Math.toRadians(-135)))
                     .lineTo(new Vector2d(4.5, -37), new ConstantInterpolator(Math.toRadians(-135)))
-                    .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
-                    .addMarker(() -> {
-                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                    .addMarker(new Vector2d(4.5, -36), () -> {
+                        stateTimes.put(State.GO_TO_FOUNDATION, null);
                         return null;
                     })
-                    .addMarker(new Vector2d(55, -23), () -> {
-                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
-                        return null;
-                    })
-                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
-                    .addMarker(() -> {
-                        stateTimes.put(State.STOP_INTAKE, null);
-                        return null;
-                    })
-                    .lineTo(new Vector2d(87, -32), new SplineInterpolator(Math.toRadians(-180), Math.toRadians(-270)))
-                    .addMarker(new Vector2d(87, -34), () -> {
-                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
-                        return null; // go to stack pos
-                    })
-                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
+                    .lineTo(new Vector2d(4.5, -35), new ConstantInterpolator(Math.toRadians(-135)))
+//                    .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+//                    .addMarker(() -> {
+//                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+//                        return null;
+//                    })
+//                    .addMarker(new Vector2d(55, -23), () -> {
+//                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+//                        return null;
+//                    })
+//                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+//                    .addMarker(() -> {
+//                        stateTimes.put(State.STOP_INTAKE, null);
+//                        return null;
+//                    })
+//                    .lineTo(new Vector2d(87, -32), new SplineInterpolator(Math.toRadians(-180), Math.toRadians(-270)))
+//                    .addMarker(new Vector2d(87, -34), () -> {
+//                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+//                        return null; // go to stack pos
+//                    })
+//                    .lineTo(new Vector2d(87, -36), new ConstantInterpolator(Math.toRadians(90)))
                     .build();
         }
 
@@ -249,6 +263,102 @@ public class BlueTwoBlockAuto extends LinearOpMode {
             for (State key : stateTimes.keySet()) {
                 if (stateTimes.get(key) == null) {
                     stateTimes.put(key, currentTime);
+                }
+            }
+
+            if (stateTimes.containsKey(State.GO_TO_FOUNDATION)) {
+                Double startTime = stateTimes.get(State.GO_TO_FOUNDATION);
+                double elapsedTime = 0;
+                if (startTime != null) {
+                    elapsedTime = currentTime - startTime;
+                }
+
+                if (elapsedTime < 400) {
+                    // pause for 400ms while intaking block
+                    drive.setMotorPowers(0,0,0,0);
+                } else {
+                    stateTimes.remove(State.GO_TO_FOUNDATION);
+                    if (blocksCollected == 0) {
+                        if (stonePosition == 0) {
+                            // front
+                            trajectory = drive.trajectoryBuilder()
+                                    .lineTo(new Vector2d(8, -28), new ConstantInterpolator(Math.toRadians(-30)))
+                                    .lineTo(new Vector2d(23, -23), new LinearInterpolator(Math.toRadians(-30), Math.toRadians(-135)))
+                                    .addMarker(new Vector2d(15, -23), () -> {
+                                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                                        stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
+                                        return null;
+                                    })
+                                    .addMarker(new Vector2d(55, -23), () -> {
+                                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                                        return null;
+                                    })
+                                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+                                    .addMarker(() -> {
+                                        stateTimes.put(State.STOP_INTAKE, null);
+                                        return null;
+                                    })
+                                    .lineTo(new Vector2d(83, -32), new SplineInterpolator(Math.toRadians(-180), Math.toRadians(-270)))
+                                    .addMarker(new Vector2d(83, -38), () -> {
+                                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+                                        return null; // go to stack pos
+                                    })
+                                    .lineTo(new Vector2d(83, -40), new ConstantInterpolator(Math.toRadians(90)))
+                                    .build();
+                        } else if (stonePosition == 1 || stonePosition == 2) {
+                            // center/back
+                            trajectory = drive.trajectoryBuilder()
+                                    .lineTo(new Vector2d(26.5, -23), new SplineInterpolator(Math.toRadians(-135), Math.toRadians(-180)))
+                                    .addMarker(() -> {
+                                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                                        return null;
+                                    })
+                                    .addMarker(new Vector2d(55, -23), () -> {
+                                        stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                                        return null;
+                                    })
+                                    .lineTo(new Vector2d(70, -23), new ConstantInterpolator(Math.toRadians(-180)))
+                                    .addMarker(() -> {
+                                        stateTimes.put(State.STOP_INTAKE, null);
+                                        return null;
+                                    })
+                                    .lineTo(new Vector2d(83, -32), new SplineInterpolator(Math.toRadians(-180), Math.toRadians(-270)))
+                                    .addMarker(new Vector2d(83, -34), () -> {
+                                        stateTimes.put(State.DROP_GRIPPERS_FULLY, null);
+                                        return null; // go to stack pos
+                                    })
+                                    .lineTo(new Vector2d(83, -36), new ConstantInterpolator(Math.toRadians(90)))
+                                    .build();
+                        }
+                    } else {
+                        // for the second block
+//                        if (stonePosition == 0) {
+                        // front
+                        trajectory = drive.trajectoryBuilder()
+                                .lineTo(new Vector2d(3.5, -29), new ConstantInterpolator(Math.toRadians(210)))
+                                .addMarker(0.5, () -> {
+                                    stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                                    return null;
+                                })
+                                .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(210), Math.toRadians(180)))
+                                // go to stack midway though
+                                .addMarker(new Vector2d(60, -28), () -> {
+                                    stateTimes.put(State.GO_TO_STACK_POSITION, null);
+                                    return null;
+                                })
+                                // approach foundation
+                                .addMarker(new Vector2d(76, -28), () -> {
+                                    stateTimes.put(State.STOP_INTAKE, null);
+//                                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+                                    return null;
+                                })
+                                .lineTo(new Vector2d(80, -28), new ConstantInterpolator(Math.toRadians(180)))
+                                .build();
+//                        }
+                    }
+
+
+                    drive.followTrajectory(trajectory);
                 }
             }
 
@@ -344,7 +454,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                             stateTimes.put(State.GO_TO_STACK_POSITION, null);
                             return null;
                         })
-                        .addMarker(1, () -> {
+                        .addMarker(1.6, () -> {
                             stateTimes.put(State.GO_TO_LIFT_POSITION, null);
                             return null;
                         })
@@ -391,7 +501,9 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     robot.grip();
                 } else {
                     stateTimes.remove(State.GO_TO_STACK_POSITION);
-//                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+                    if (blocksCollected > 0) {
+                        stateTimes.put(State.GO_TO_LIFT_POSITION, null);
+                    }
                 }
             }
 
@@ -411,7 +523,9 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     // reset v4b's to grab position
                     robot.v4bStack();
                 } else if (elapsedTime < 1500) {
-                    lift.moveToPosition(0);
+                    if (lift.mode == LiftController.Mode.STOPPED) {
+                        lift.moveToPosition(0);
+                    }
                 } else if (elapsedTime < 2000) {
                     // reset v4b's to wait position
                     robot.v4bWait();
@@ -448,11 +562,12 @@ public class BlueTwoBlockAuto extends LinearOpMode {
 
                 if (elapsedTime < 300) {
                     // get pusher out of the way
-                    robot.grip();
+//                    robot.grip();
                     robot.pushServoUp();
                 } else if (elapsedTime < 500){
-                    if (lift.mode == LiftController.Mode.STOPPED)
+                    if (lift.mode == LiftController.Mode.STOPPED) {
                         lift.moveToPosition(3.3755);
+                    }
                 } else if (lift.mode == LiftController.Mode.STOPPED) {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);
                     blocksCollected += 1;
@@ -472,28 +587,15 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                                 stateTimes.put(State.START_INTAKE, null);
                                 return null;
                             })
-                            .lineTo(new Vector2d(20, -24), new ConstantInterpolator(Math.toRadians(180)))
-                            .lineTo(new Vector2d(4.5, -28), new LinearInterpolator(Math.toRadians(180), Math.toRadians(30)))
-                            .lineTo(new Vector2d(4.5, -32), new ConstantInterpolator(Math.toRadians(210)))
-                            .lineTo(new Vector2d(-2.5, -36), new ConstantInterpolator(Math.toRadians(210)))
-                            .lineTo(new Vector2d(3.5, -29), new ConstantInterpolator(Math.toRadians(210)))
-                            .addMarker(4.5, () -> {
-                                stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                            .lineTo(new Vector2d(8.5, -32), new ConstantInterpolator(Math.toRadians(180)))
+                            .lineTo(new Vector2d(4.5, -34), new LinearInterpolator(Math.toRadians(180), Math.toRadians(30)))
+                            .lineTo(new Vector2d(4.5, -36), new ConstantInterpolator(Math.toRadians(210)))
+                            .lineTo(new Vector2d(-2.5, -38), new ConstantInterpolator(Math.toRadians(210)))
+                            .addMarker(new Vector2d(-2.5, -35), () -> {
+                                stateTimes.put(State.GO_TO_FOUNDATION, null);
                                 return null;
                             })
-                            .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(210), Math.toRadians(180)))
-                            // go to stack midway though
-                            .addMarker(5.5, () -> {
-                                stateTimes.put(State.GO_TO_STACK_POSITION, null);
-                                return null;
-                            })
-                            // approach foundation
-                            .addMarker(new Vector2d(76, -28), () -> {
-                                stateTimes.put(State.STOP_INTAKE, null);
-                                stateTimes.put(State.GO_TO_LIFT_POSITION, null);
-                                return null;
-                            })
-                            .lineTo(new Vector2d(80, -28), new ConstantInterpolator(Math.toRadians(180)))
+                            .lineTo(new Vector2d(-3.5, -34), new ConstantInterpolator(Math.toRadians(210)))
                             .build();
                 } else if (stonePosition == 1) {
                     trajectory = drive.trajectoryBuilder()
@@ -501,28 +603,15 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                                 stateTimes.put(State.START_INTAKE, null);
                                 return null;
                             })
-                            .lineTo(new Vector2d(12, -24), new ConstantInterpolator(Math.toRadians(180)))
-                            .lineTo(new Vector2d(-3.5, -28), new LinearInterpolator(Math.toRadians(180), Math.toRadians(30)))
-                            .lineTo(new Vector2d(-3.5, -32), new ConstantInterpolator(Math.toRadians(210)))
-                            .lineTo(new Vector2d(-10.5, -36), new ConstantInterpolator(Math.toRadians(210)))
-                            .lineTo(new Vector2d(-4.5, -29), new ConstantInterpolator(Math.toRadians(210)))
-                            .addMarker(4.5, () -> {
-                                stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                            .lineTo(new Vector2d(0.5, -32), new ConstantInterpolator(Math.toRadians(180)))
+                            .lineTo(new Vector2d(-3.5, -34), new LinearInterpolator(Math.toRadians(180), Math.toRadians(30)))
+                            .lineTo(new Vector2d(-3.5, -36), new ConstantInterpolator(Math.toRadians(210)))
+                            .lineTo(new Vector2d(-10.5, -38), new ConstantInterpolator(Math.toRadians(210)))
+                            .addMarker(new Vector2d(-10.5, -35), () -> {
+                                stateTimes.put(State.GO_TO_FOUNDATION, null);
                                 return null;
                             })
-                            .lineTo(new Vector2d(10.5, -23), new SplineInterpolator(Math.toRadians(210), Math.toRadians(180)))
-                            // go to stack midway though
-                            .addMarker(5.5, () -> {
-                                stateTimes.put(State.GO_TO_STACK_POSITION, null);
-                                return null;
-                            })
-                            // approach foundation
-                            .addMarker(new Vector2d(76, -28), () -> {
-                                stateTimes.put(State.STOP_INTAKE, null);
-                                stateTimes.put(State.GO_TO_LIFT_POSITION, null);
-                                return null;
-                            })
-                            .lineTo(new Vector2d(80, -28), new ConstantInterpolator(Math.toRadians(180)))
+                            .lineTo(new Vector2d(-11.5, -34), new ConstantInterpolator(Math.toRadians(210)))
                             .build();
                 } else {
                     trajectory = drive.trajectoryBuilder()
@@ -530,28 +619,15 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                                 stateTimes.put(State.START_INTAKE, null);
                                 return null;
                             })
-                            .lineTo(new Vector2d(4, -24), new ConstantInterpolator(Math.toRadians(180)))
-                            .lineTo(new Vector2d(-11.5, -28), new LinearInterpolator(Math.toRadians(180), Math.toRadians(30)))
-                            .lineTo(new Vector2d(-11.5, -32), new ConstantInterpolator(Math.toRadians(210)))
-                            .lineTo(new Vector2d(-18.5, -36), new ConstantInterpolator(Math.toRadians(210)))
-                            .lineTo(new Vector2d(-12.5, -29), new ConstantInterpolator(Math.toRadians(210)))
-                            .addMarker(4.5, () -> {
-                                stateTimes.put(State.INTAKE_OUT_AND_IN, null);
+                            .lineTo(new Vector2d(-7.5, -32), new ConstantInterpolator(Math.toRadians(180)))
+                            .lineTo(new Vector2d(-11.5, -34), new LinearInterpolator(Math.toRadians(180), Math.toRadians(30)))
+                            .lineTo(new Vector2d(-11.5, -36), new ConstantInterpolator(Math.toRadians(210)))
+                            .lineTo(new Vector2d(-18.5, -38), new ConstantInterpolator(Math.toRadians(210)))
+                            .addMarker(new Vector2d(-18.5, -35), () -> {
+                                stateTimes.put(State.GO_TO_FOUNDATION, null);
                                 return null;
                             })
-                            .lineTo(new Vector2d(2.5, -23), new SplineInterpolator(Math.toRadians(210), Math.toRadians(180)))
-                            // go to stack midway though
-                            .addMarker(5.5, () -> {
-                                stateTimes.put(State.GO_TO_STACK_POSITION, null);
-                                return null;
-                            })
-                            // approach foundation
-                            .addMarker(new Vector2d(76, -28), () -> {
-                                stateTimes.put(State.STOP_INTAKE, null);
-                                stateTimes.put(State.GO_TO_LIFT_POSITION, null);
-                                return null;
-                            })
-                            .lineTo(new Vector2d(80, -28), new ConstantInterpolator(Math.toRadians(180)))
+                            .lineTo(new Vector2d(-19.5, -34), new ConstantInterpolator(Math.toRadians(210)))
                             .build();
                 }
 

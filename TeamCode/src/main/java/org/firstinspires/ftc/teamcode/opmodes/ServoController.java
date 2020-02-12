@@ -21,7 +21,7 @@ public class ServoController extends HardwareDrivetrain {
     }
 
     public void grip() {
-        this.gripper_servo.setPosition(0.45);
+        this.gripper_servo.setPosition(0.4);
     }
 
     public void gripCap() {
@@ -30,8 +30,8 @@ public class ServoController extends HardwareDrivetrain {
 
     //V4B
     public void v4bStack() {
-        this.left_v4b.setPosition(0.70);
-        this.right_v4b.setPosition(0.70);
+        this.left_v4b.setPosition(0.69);
+        this.right_v4b.setPosition(0.69);
     }
 
     public void v4bGrab() {
@@ -61,8 +61,8 @@ public class ServoController extends HardwareDrivetrain {
     }
 
     public void foundationUp() {
-        this.foundation_right.setPosition(0.2);
-        this.foundation_left.setPosition(0.4);
+        this.foundation_right.setPosition(0.3);
+        this.foundation_left.setPosition(0.5);
     }
 
     public void foundationDown() {
