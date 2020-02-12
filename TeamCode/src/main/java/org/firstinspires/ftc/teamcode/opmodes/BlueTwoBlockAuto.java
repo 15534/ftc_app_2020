@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmodes;
-
+// TODO make robot not hit partner/skybridge
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
@@ -356,7 +356,6 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                                 .build();
 //                        }
                     }
-
 
                     drive.followTrajectory(trajectory);
                 }

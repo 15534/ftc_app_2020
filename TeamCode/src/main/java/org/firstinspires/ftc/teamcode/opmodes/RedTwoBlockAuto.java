@@ -143,14 +143,16 @@ public class RedTwoBlockAuto extends LinearOpMode {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(-8, 27), new SplineInterpolator(Math.toRadians(180), Math.toRadians(30)))
-                    .lineTo(new Vector2d(-8, 34), new ConstantInterpolator(Math.toRadians(30)))
-                    .lineTo(new Vector2d(-3, 35), new ConstantInterpolator(Math.toRadians(30)))
-                    .addMarker(new Vector2d(-3, 34), () -> {
+                    .lineTo(new Vector2d(-10, 25), new SplineInterpolator(Math.toRadians(180), Math.toRadians(45)))
+                    .lineTo(new Vector2d(-10, 33.5), new ConstantInterpolator(Math.toRadians(45)))
+                    .lineTo(new Vector2d(-5, 34.5), new ConstantInterpolator(Math.toRadians(45)))
+                    .lineTo(new Vector2d(-5, 38.5), new ConstantInterpolator(Math.toRadians(45)))
+                    .lineTo(new Vector2d(0, 40.5), new ConstantInterpolator(Math.toRadians(45)))
+                    .addMarker(new Vector2d(0, 32), () -> {
                         stateTimes.put(State.GO_TO_FOUNDATION, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(-2, 33), new ConstantInterpolator(Math.toRadians(30)))
+                    .lineTo(new Vector2d(0, 31), new ConstantInterpolator(Math.toRadians(30)))
                     .build();
         } else if (stonePosition == 1) {
             telemetry.addLine("CENTER");
@@ -250,17 +252,17 @@ public class RedTwoBlockAuto extends LinearOpMode {
                         if (stonePosition == 0) {
                             // front
                             trajectory = drive.trajectoryBuilder()
-                                    .lineTo(new Vector2d(12, 25), new LinearInterpolator(Math.toRadians(30), Math.toRadians(150)))
-                                    .addMarker(new Vector2d(15, 25), () -> {
+                                    .lineTo(new Vector2d(12, 23), new LinearInterpolator(Math.toRadians(30), Math.toRadians(150)))
+                                    .addMarker(new Vector2d(15, 23), () -> {
                                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                                         stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
                                         return null;
                                     })
-                                    .addMarker(new Vector2d(43, 25), () -> {
+                                    .addMarker(new Vector2d(43, 23), () -> {
                                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                                         return null;
                                     })
-                                    .lineTo(new Vector2d(62, 25), new ConstantInterpolator(Math.toRadians(-180)))
+                                    .lineTo(new Vector2d(62, 23), new ConstantInterpolator(Math.toRadians(-180)))
                                     .addMarker(() -> {
                                         stateTimes.put(State.STOP_INTAKE, null);
                                         return null;
@@ -275,17 +277,17 @@ public class RedTwoBlockAuto extends LinearOpMode {
                         } else if (stonePosition == 1 || stonePosition == 2) {
                             // center/back
                             trajectory = drive.trajectoryBuilder()
-                                    .lineTo(new Vector2d(12, 25), new LinearInterpolator(Math.toRadians(150), Math.toRadians(30)))
-                                    .addMarker(new Vector2d(15, 25), () -> {
+                                    .lineTo(new Vector2d(12, 23), new LinearInterpolator(Math.toRadians(150), Math.toRadians(30)))
+                                    .addMarker(new Vector2d(15, 23), () -> {
                                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                                         stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
                                         return null;
                                     })
-                                    .addMarker(new Vector2d(43, 25), () -> {
+                                    .addMarker(new Vector2d(43, 23), () -> {
                                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                                         return null;
                                     })
-                                    .lineTo(new Vector2d(62, 25), new ConstantInterpolator(Math.toRadians(-180)))
+                                    .lineTo(new Vector2d(62, 23), new ConstantInterpolator(Math.toRadians(-180)))
                                     .addMarker(() -> {
                                         stateTimes.put(State.STOP_INTAKE, null);
                                         return null;
@@ -303,22 +305,22 @@ public class RedTwoBlockAuto extends LinearOpMode {
 //                        if (stonePosition == 0) {
                             // front
                             trajectory = drive.trajectoryBuilder()
-                                    .lineTo(new Vector2d(20, 28), new LinearInterpolator(Math.toRadians(150), Math.toRadians(30)))
-                                    .addMarker(new Vector2d(25, 28), () -> {
+                                    .lineTo(new Vector2d(20, 23), new LinearInterpolator(Math.toRadians(150), Math.toRadians(30)))
+                                    .addMarker(new Vector2d(25, 23), () -> {
                                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                                         stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
                                         return null;
                                     })
-                                    .addMarker(new Vector2d(35, 28), () -> {
+                                    .addMarker(new Vector2d(35, 23), () -> {
                                         stateTimes.put(State.STOP_INTAKE, null);
                                         return null;
                                     })
-                                    .addMarker(new Vector2d(40, 28), () -> {
+                                    .addMarker(new Vector2d(40, 23), () -> {
                                         stateTimes.put(State.GO_TO_STACK_POSITION, null);
                                         return null;
                                     })
-                                    .lineTo(new Vector2d(74, 28), new ConstantInterpolator(Math.toRadians(180)))
-                                    .addMarker(new Vector2d(72, 28), () -> {
+                                    .lineTo(new Vector2d(74, 23), new ConstantInterpolator(Math.toRadians(180)))
+                                    .addMarker(new Vector2d(72, 23), () -> {
                                         stateTimes.put(State.GO_TO_LIFT_POSITION, null);
                                         return null;
                                     })
