@@ -16,7 +16,7 @@ import org.openftc.revextensions2.ExpansionHubMotor;
 @Config
 public class LiftController {
     private DcMotor lift_left, lift_right;
-    public static double k_p = 0.5;
+    public static double k_p = 0.2;
     public static double k_i = 0;
     public static double k_d = 0;
     public static double k_V = 0.0027;
@@ -24,7 +24,7 @@ public class LiftController {
     public static double k_static = 0;
     public static double k_A = 0;
     public static double maxVel = 1000;
-    public static double maxAccel = 3000;
+    public static double maxAccel = 5000;
     public static double manualAccel = 500;
     public static double maxJerk = 2000;
     public static double manualVel = 500;
