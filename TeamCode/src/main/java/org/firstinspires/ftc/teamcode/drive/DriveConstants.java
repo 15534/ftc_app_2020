@@ -77,7 +77,7 @@ public class DriveConstants {
     );
 
     public static DriveConstraints SLOW_AUTO_CONSTRAINTS = new DriveConstraints(
-            5, 5, 0,
+            20, 5, 0,
             Math.toRadians(90.0), Math.toRadians(90.0), 0.0
     );
 

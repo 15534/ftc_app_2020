@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.path.heading.ConstantInterpolator;
 import com.acmerobotics.roadrunner.path.heading.LinearInterpolator;
 import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -16,6 +17,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.NewStoneDetector;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.mecanum.VertexDrive;
 import org.firstinspires.ftc.teamcode.hardware.HardwareDrivetrain;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -138,21 +140,20 @@ public class RedTwoBlockAuto extends LinearOpMode {
 
         if (stonePosition == 0) {
             telemetry.addLine("FRONT"); telemetry.update();
+//            drive.setConstraints(DriveConstants.SLOW_AUTO_CONSTRAINTS);
             trajectory = drive.trajectoryBuilder()
                     .addMarker(() -> {
                         stateTimes.put(State.RESET_SERVOS, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(-10, 25), new SplineInterpolator(Math.toRadians(180), Math.toRadians(45)))
-                    .lineTo(new Vector2d(-10, 33.5), new ConstantInterpolator(Math.toRadians(45)))
-                    .lineTo(new Vector2d(-5, 34.5), new ConstantInterpolator(Math.toRadians(45)))
-                    .lineTo(new Vector2d(-5, 38.5), new ConstantInterpolator(Math.toRadians(45)))
-                    .lineTo(new Vector2d(0, 40.5), new ConstantInterpolator(Math.toRadians(45)))
-                    .addMarker(new Vector2d(0, 32), () -> {
+                    .lineTo(new Vector2d(-7, 24), new SplineInterpolator(Math.toRadians(180), Math.toRadians(45)))
+                    .lineTo(new Vector2d(-7, 28), new ConstantInterpolator(Math.toRadians(45)))
+                    .lineTo(new Vector2d(-3.5, 31.5), new ConstantInterpolator(Math.toRadians(45)))
+                    .addMarker(new Vector2d(-3.5, 31), () -> {
                         stateTimes.put(State.GO_TO_FOUNDATION, null);
                         return null;
                     })
-                    .lineTo(new Vector2d(0, 31), new ConstantInterpolator(Math.toRadians(30)))
+                    .lineTo(new Vector2d(-3.5, 30), new ConstantInterpolator(Math.toRadians(30)))
                     .build();
         } else if (stonePosition == 1) {
             telemetry.addLine("CENTER");
@@ -252,7 +253,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
                         if (stonePosition == 0) {
                             // front
                             trajectory = drive.trajectoryBuilder()
-                                    .lineTo(new Vector2d(12, 23), new LinearInterpolator(Math.toRadians(30), Math.toRadians(150)))
+                                    .lineTo(new Vector2d(12, 23), new LinearInterpolator(Math.toRadians(45), Math.toRadians(135)))
                                     .addMarker(new Vector2d(15, 23), () -> {
                                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                                         stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
@@ -399,7 +400,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
                             stateTimes.put(State.GO_TO_STACK_POSITION, null);
                             return null;
                         })
-                        .addMarker(1, () -> {
+                        .addMarker(1.6, () -> {
                             stateTimes.put(State.GO_TO_LIFT_POSITION, null);
                             return null;
                         })
@@ -508,7 +509,11 @@ public class RedTwoBlockAuto extends LinearOpMode {
                     robot.pushServoUp();
                 } else if (elapsedTime < 500){
                     if (lift.mode == LiftController.Mode.STOPPED)
-                        lift.moveToPosition(3.3755);
+                        if (blocksCollected == 0) {
+                            lift.moveToPosition(3.3755);
+                        } else {
+                            lift.moveToPosition(6);
+                        }
                 } else if (lift.mode == LiftController.Mode.STOPPED) {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);
                     blocksCollected += 1;

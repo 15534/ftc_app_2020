@@ -342,17 +342,18 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                                 })
                                 .lineTo(new Vector2d(18.5, -23), new SplineInterpolator(Math.toRadians(210), Math.toRadians(180)))
                                 // go to stack midway though
-                                .addMarker(new Vector2d(60, -28), () -> {
+                                .addMarker(new Vector2d(60, -24), () -> {
                                     stateTimes.put(State.GO_TO_STACK_POSITION, null);
                                     return null;
                                 })
                                 // approach foundation
-                                .addMarker(new Vector2d(76, -28), () -> {
+                                .addMarker(new Vector2d(76, -24), () -> {
                                     stateTimes.put(State.STOP_INTAKE, null);
 //                                    stateTimes.put(State.GO_TO_LIFT_POSITION, null);
                                     return null;
                                 })
-                                .lineTo(new Vector2d(80, -28), new ConstantInterpolator(Math.toRadians(180)))
+                                .lineTo(new Vector2d(40, -24), new ConstantInterpolator(Math.toRadians(180)))
+                                .lineTo(new Vector2d(80, -20), new ConstantInterpolator(Math.toRadians(180)))
                                 .build();
 //                        }
                     }
@@ -565,7 +566,11 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     robot.pushServoUp();
                 } else if (elapsedTime < 500){
                     if (lift.mode == LiftController.Mode.STOPPED) {
-                        lift.moveToPosition(3.3755);
+                        if (blocksCollected == 0) {
+                            lift.moveToPosition(3.3755);
+                        } else {
+                            lift.moveToPosition(6);
+                        }
                     }
                 } else if (lift.mode == LiftController.Mode.STOPPED) {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);
