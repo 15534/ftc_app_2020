@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmodes;
-
+// TODO fix dropping like in blue
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
@@ -404,7 +404,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
                             stateTimes.put(State.GO_TO_LIFT_POSITION, null);
                             return null;
                         })
-                        .lineTo(new Vector2d(51, 23), new LinearInterpolator(Math.toRadians(-90), Math.toRadians(-90)))
+                        .lineTo(new Vector2d(55, 23), new LinearInterpolator(Math.toRadians(-90), Math.toRadians(-90)))
                         .addMarker(() -> {
                             stateTimes.put(State.LIFT_GRIPPERS, null);
                             return null;
@@ -467,6 +467,11 @@ public class RedTwoBlockAuto extends LinearOpMode {
                     // reset v4b's to grab position
                     robot.v4bStack();
                 } else if (elapsedTime < 1500) {
+                    if (blocksCollected == 2) {
+                        drive.followTrajectorySync(drive.trajectoryBuilder()
+                            .lineTo(new Vector2d(66, 23), new ConstantInterpolator(Math.toRadians(180)))
+                                .build());
+                    }
                     lift.moveToPosition(0);
                 } else if (elapsedTime < 2000) {
                     // reset v4b's to wait position
@@ -482,10 +487,6 @@ public class RedTwoBlockAuto extends LinearOpMode {
                         stateTimes.put(State.GO_TO_BLOCK_2, null);
                     } else {
                         // park
-                        Trajectory trajectory2 = drive.trajectoryBuilder()
-                                .lineTo(new Vector2d(76, 26), new ConstantInterpolator(Math.toRadians(180)))
-                                .build();
-                        drive.followTrajectorySync(trajectory2);
                         Trajectory trajectory3 = drive.trajectoryBuilder()
                                 .lineTo(new Vector2d(32, 26), new ConstantInterpolator(Math.toRadians(180)))
                                 .build();
@@ -512,7 +513,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
                         if (blocksCollected == 0) {
                             lift.moveToPosition(3.3755);
                         } else {
-                            lift.moveToPosition(6);
+                            lift.moveToPosition(7);
                         }
                 } else if (lift.mode == LiftController.Mode.STOPPED) {
                     stateTimes.remove(State.GO_TO_LIFT_POSITION);

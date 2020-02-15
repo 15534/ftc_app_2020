@@ -458,19 +458,17 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                             stateTimes.put(State.GO_TO_LIFT_POSITION, null);
                             return null;
                         })
-                        .lineTo(new Vector2d(63, -19), new LinearInterpolator(Math.toRadians(90), Math.toRadians(90)))
+                        .lineTo(new Vector2d(65, -19), new LinearInterpolator(Math.toRadians(90), Math.toRadians(90)))
                         .addMarker(() -> {
                             stateTimes.put(State.LIFT_GRIPPERS, null);
                             return null;
                         })
-                        .lineTo(new Vector2d(58, -19), new ConstantInterpolator(Math.toRadians(180)))
+                        .lineTo(new Vector2d(61, -19), new ConstantInterpolator(Math.toRadians(180)))
                         .addMarker(new Vector2d(74, -19), () -> {
                             stateTimes.put(State.DROP_BLOCK, null);
                             return null;
                         })
                         .lineTo(new Vector2d(76, -19), new ConstantInterpolator(Math.toRadians(180)))
-//                        .lineTo(new Vector2d(76, -29), new ConstantInterpolator(Math.toRadians(180)))
-//                        .lineTo(new Vector2d(40, -29), new ConstantInterpolator(Math.toRadians(180)))
                         .build();
                 drive.followTrajectory(trajectory2);
             }
@@ -519,14 +517,25 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                     robot.v4bDown();
                 } else if (elapsedTime < 700) {
                     robot.gripRelease();
-                } else if (elapsedTime < 1000) {
+                } else if (elapsedTime < 800) {
+                    if (blocksCollected == 2) {
+                        Trajectory trajectory2 = drive.trajectoryBuilder()
+                                .lineTo(new Vector2d(76, -28), new ConstantInterpolator(Math.toRadians(180)))
+                                .build();
+                        drive.followTrajectorySync(trajectory2);
+                    }
+                } else if (elapsedTime < 1200 || (blocksCollected == 2 && elapsedTime < 2200)) {
                     // reset v4b's to grab position
+                    if (lift.mode == LiftController.Mode.STOPPED) {
+                        lift.moveToPosition(lift.currentPosition + 2);
+                    }
+                } else if (elapsedTime < 1500 || (blocksCollected == 2 && elapsedTime < 2500)) {
                     robot.v4bStack();
-                } else if (elapsedTime < 1500) {
+                } else if (elapsedTime < 1800 || (blocksCollected == 2 && elapsedTime < 2800)) {
                     if (lift.mode == LiftController.Mode.STOPPED) {
                         lift.moveToPosition(0);
                     }
-                } else if (elapsedTime < 2000) {
+                } else if (elapsedTime < 2000 || (blocksCollected == 2 && elapsedTime < 3000)) {
                     // reset v4b's to wait position
                     robot.v4bWait();
                 } else {
@@ -539,10 +548,6 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                         stateTimes.put(State.GO_TO_BLOCK_2, null);
                     } else {
                         // park
-                        Trajectory trajectory2 = drive.trajectoryBuilder()
-                                .lineTo(new Vector2d(76, -28), new ConstantInterpolator(Math.toRadians(180)))
-                                .build();
-                        drive.followTrajectorySync(trajectory2);
                         Trajectory trajectory3 = drive.trajectoryBuilder()
                                 .lineTo(new Vector2d(40, -28), new ConstantInterpolator(Math.toRadians(180)))
                                 .build();
@@ -569,7 +574,7 @@ public class BlueTwoBlockAuto extends LinearOpMode {
                         if (blocksCollected == 0) {
                             lift.moveToPosition(3.3755);
                         } else {
-                            lift.moveToPosition(6);
+                            lift.moveToPosition(7);
                         }
                     }
                 } else if (lift.mode == LiftController.Mode.STOPPED) {

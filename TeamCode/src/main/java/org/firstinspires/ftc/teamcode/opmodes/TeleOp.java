@@ -441,6 +441,7 @@ public class TeleOp extends LinearOpMode {
                     if (capPosition) {
                         // capstone level
                         robot.v4bCapstone();
+                        robot.foundationUp();
                     } else {
                         robot.v4bDown();
                     }
@@ -642,7 +643,9 @@ public class TeleOp extends LinearOpMode {
                 telemetry.addLine("Red");
             }
 
-            telemetry.addData("lift mode", lift.mode.toString());
+            telemetry.addData("lift position", desiredLiftPosition);
+
+//            telemetry.addData("lift mode", lift.mode.toString());
             telemetry.update();
         }
     }

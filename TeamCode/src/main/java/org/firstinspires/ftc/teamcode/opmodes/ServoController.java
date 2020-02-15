@@ -30,8 +30,8 @@ public class ServoController extends HardwareDrivetrain {
 
     //V4B
     public void v4bStack() {
-        this.left_v4b.setPosition(0.69);
-        this.right_v4b.setPosition(0.69);
+        this.left_v4b.setPosition(0.72);
+        this.right_v4b.setPosition(0.72);
     }
 
     public void v4bGrab() {
@@ -40,8 +40,8 @@ public class ServoController extends HardwareDrivetrain {
     }
 
     public void v4bWait() {
-        this.left_v4b.setPosition(0.6);
-        this.right_v4b.setPosition(0.6);
+        this.left_v4b.setPosition(0.65);
+        this.right_v4b.setPosition(0.65);
     }
 
     public void v4bCapstone() {
