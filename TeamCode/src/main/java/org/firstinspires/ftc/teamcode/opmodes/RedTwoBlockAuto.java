@@ -255,13 +255,13 @@ public class RedTwoBlockAuto extends LinearOpMode {
                         if (stonePosition == 0) {
                             // front
                             trajectory = drive.trajectoryBuilder()
-                                    .lineTo(new Vector2d(12, 25), new LinearInterpolator(Math.toRadians(45), Math.toRadians(135)))
-                                    .addMarker(new Vector2d(15, 25), () -> {
+                                    .lineTo(new Vector2d(12, 24), new LinearInterpolator(Math.toRadians(45), Math.toRadians(135)))
+                                    .addMarker(new Vector2d(15, 24), () -> {
                                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                                         stateTimes.put(State.DROP_GRIPPERS_HALFWAY, null);
                                         return null;
                                     })
-                                    .addMarker(new Vector2d(43, 25), () -> {
+                                    .addMarker(new Vector2d(43, 24), () -> {
                                         stateTimes.put(State.INTAKE_OUT_AND_IN, null);
                                         return null;
                                     })
@@ -491,7 +491,7 @@ public class RedTwoBlockAuto extends LinearOpMode {
                     stateTimes.remove(State.DROP_BLOCK);
                     if (blocksCollected == 1) {
                         Trajectory trajectory2 = drive.trajectoryBuilder()
-                                .lineTo(new Vector2d(66, 25), new ConstantInterpolator(Math.toRadians(180)))
+                                .lineTo(new Vector2d(66, 24), new ConstantInterpolator(Math.toRadians(180)))
                                 .build();
                         drive.followTrajectorySync(trajectory2);
                         stateTimes.put(State.GO_TO_BLOCK_2, null);

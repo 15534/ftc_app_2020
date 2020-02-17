@@ -62,7 +62,7 @@ public class ServoController extends HardwareDrivetrain {
 
     public void foundationUp() {
         this.foundation_right.setPosition(0.3);
-        this.foundation_left.setPosition(0.5);
+        this.foundation_left.setPosition(0.15);
     }
 
     public void foundationDown() {
